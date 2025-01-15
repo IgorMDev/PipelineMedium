@@ -3,23 +3,42 @@ using Microsoft.Extensions.Options;
 
 namespace Medium;
 
+/// <summary>
+/// Represents a medium for executing operations with a provided payload and/or result types.
+/// </summary>
 public class Medium(IServiceProvider serviceProvider) : IMedium
 {
     internal const string DefaultName = "Default";
 
+    /// <inheritdoc />
     public Task ExecuteAsync<TPayload>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(name, payload);
+
+    /// <inheritdoc />
     public Task ExecuteAsync<TPayload>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(payload);
 
+    /// <inheritdoc />
     public void Execute<TPayload>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().Execute(name, payload);
+
+    /// <inheritdoc />
     public void Execute<TPayload>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().Execute(payload);
 
+    /// <inheritdoc />
     public Task<TResult> ExecuteAsync<TPayload, TResult>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(name, payload);
+
+    /// <inheritdoc />
     public Task<TResult> ExecuteAsync<TPayload, TResult>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(payload);
 
+    /// <inheritdoc />
     public TResult Execute<TPayload, TResult>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().Execute(name, payload);
+
+    /// <inheritdoc />
     public TResult Execute<TPayload, TResult>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().Execute(payload);
 }
 
+/// <summary>
+/// Represents a medium for executing operations with a specific payload type.
+/// </summary>
+/// <typeparam name="TPayload">The type of the payload.</typeparam>
 public class Medium<TPayload>(
     IServiceProvider serviceProvider,
     IOptionsMonitor<MediumOptions<TPayload>> optionsMonitor,
@@ -39,6 +58,7 @@ public class Medium<TPayload>(
         return binder;
     }
 
+    /// <inheritdoc />
     public Task ExecuteAsync(string name, TPayload payload)
     {
         if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
@@ -47,8 +67,11 @@ public class Medium<TPayload>(
         MediumContext<TPayload> context = new(serviceProvider, payload);
         return middlewareDelegate(context);
     }
+
+    /// <inheritdoc />
     public Task ExecuteAsync(TPayload payload) => ExecuteAsync(Medium.DefaultName, payload);
 
+    /// <inheritdoc />
     public void Execute(string name, TPayload payload)
     {
         if(!_middlewareDelegates.TryGetValue(name, out var middlewareDelegate))
@@ -57,9 +80,16 @@ public class Medium<TPayload>(
         MediumContext<TPayload> context = new(serviceProvider, payload);
         middlewareDelegate(context);
     }
+
+    /// <inheritdoc />
     public void Execute(TPayload payload) => Execute(Medium.DefaultName, payload);
 }
 
+/// <summary>
+/// Represents a medium for executing operations with a specific payload type and returning a result.
+/// </summary>
+/// <typeparam name="TPayload">The type of the payload.</typeparam>
+/// <typeparam name="TResult">The type of the result.</typeparam>
 public class Medium<TPayload, TResult>(
     IServiceProvider serviceProvider,
     IOptionsMonitor<MediumOptions<TPayload, TResult>> optionsMonitor,
@@ -79,6 +109,7 @@ public class Medium<TPayload, TResult>(
         return binder;
     }
 
+    /// <inheritdoc />
     public Task<TResult> ExecuteAsync(string name, TPayload payload)
     {
         if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
@@ -87,8 +118,11 @@ public class Medium<TPayload, TResult>(
         MediumContext<TPayload, TResult> context = new(serviceProvider, payload);
         return middlewareDelegate(context);
     }
+
+    /// <inheritdoc />
     public Task<TResult> ExecuteAsync(TPayload payload) => ExecuteAsync(Medium.DefaultName, payload);
 
+    /// <inheritdoc />
     public TResult Execute(string name, TPayload payload)
     {
         if(!_middlewareDelegates.TryGetValue(name, out var middlewareDelegate))
@@ -97,5 +131,7 @@ public class Medium<TPayload, TResult>(
         MediumContext<TPayload, TResult> context = new(serviceProvider, payload);
         return middlewareDelegate(context);
     }
+
+    /// <inheritdoc />
     public TResult Execute(TPayload payload) => Execute(Medium.DefaultName, payload);
 }
