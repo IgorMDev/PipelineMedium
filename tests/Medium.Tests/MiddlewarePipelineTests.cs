@@ -133,8 +133,8 @@ public class MiddlewarePipelineTests
     {
         var medium = CreateMedium(b =>
             b.Use<Invocation1AsyncMiddleware>()
-            .Use<Invocation2AsyncMiddleware>(p => !p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
-            .Use<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
+            .UseWhen<Invocation2AsyncMiddleware>(p => !p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
+            .UseWhen<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
         );
 
         var payload = new InvocationsPayload();
@@ -151,8 +151,8 @@ public class MiddlewarePipelineTests
     {
         var medium = CreateMedium(b =>
             b.Use<Invocation1Middleware>()
-            .Use<Invocation2Middleware>(p => !p.InvocationList.Contains(nameof(Invocation1Middleware)))
-            .Use<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
+            .UseWhen<Invocation2Middleware>(p => !p.InvocationList.Contains(nameof(Invocation1Middleware)))
+            .UseWhen<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
         );
 
         var payload = new InvocationsPayload();
@@ -291,8 +291,8 @@ public class MiddlewareResultPipelineTests
     {
         var medium = CreateMedium(b =>
             b.Use<Invocation1AsyncMiddleware>()
-            .Use<Invocation2AsyncMiddleware>(p => !p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
-            .Use<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
+            .UseWhen<Invocation2AsyncMiddleware>(p => !p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
+            .UseWhen<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
         );
 
         var payload = new InvocationsPayload();
@@ -309,8 +309,8 @@ public class MiddlewareResultPipelineTests
     {
         var medium = CreateMedium(b =>
             b.Use<Invocation1Middleware>()
-            .Use<Invocation2Middleware>(p => !p.InvocationList.Contains(nameof(Invocation1Middleware)))
-            .Use<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
+            .UseWhen<Invocation2Middleware>(p => !p.InvocationList.Contains(nameof(Invocation1Middleware)))
+            .UseWhen<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
         );
 
         var payload = new InvocationsPayload();
