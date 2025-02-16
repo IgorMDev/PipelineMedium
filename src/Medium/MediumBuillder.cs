@@ -140,7 +140,7 @@ public class MediumBuilder<TPayload>
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> Use(Func<TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> Use(Func<TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         => Use(new ComponentDescriptor<TPayload>(middleware));
 
     /// <summary>
@@ -149,7 +149,7 @@ public class MediumBuilder<TPayload>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> UseWhen(Predicate<TPayload> condition, Func<TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> UseWhen(Predicate<TPayload> condition, Func<TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         => Use(new ComponentDescriptor<TPayload>(middleware) { Condition = condition });
 
     /// <summary>
@@ -157,7 +157,7 @@ public class MediumBuilder<TPayload>
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> Use(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> Use(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         => Use(new ComponentDescriptor<TPayload>(middleware));
 
     /// <summary>
@@ -166,7 +166,7 @@ public class MediumBuilder<TPayload>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> UseWhen(Predicate<TPayload> condition, Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> UseWhen(Predicate<TPayload> condition, Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         => Use(new ComponentDescriptor<TPayload>(middleware) { Condition = condition });
 
     /// <summary>
@@ -175,9 +175,9 @@ public class MediumBuilder<TPayload>
     /// <typeparam name="TDep">The type of the dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> Use<TDep>(Func<TPayload, TDep, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> Use<TDep>(Func<TPayload, TDep, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep>(), next)));
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a dependency.
@@ -186,9 +186,9 @@ public class MediumBuilder<TPayload>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> UseWhen<TDep>(Predicate<TPayload> condition, Func<TPayload, TDep, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> UseWhen<TDep>(Predicate<TPayload> condition, Func<TPayload, TDep, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep>(), next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses two dependencies.
@@ -197,10 +197,10 @@ public class MediumBuilder<TPayload>
     /// <typeparam name="TDep2">The type of the second dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> Use<TDep1, TDep2>(Func<TPayload, TDep1, TDep2, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> Use<TDep1, TDep2>(Func<TPayload, TDep1, TDep2, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next)));
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses two dependencies.
@@ -210,10 +210,10 @@ public class MediumBuilder<TPayload>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> UseWhen<TDep1, TDep2>(Predicate<TPayload> condition, Func<TPayload, TDep1, TDep2, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> UseWhen<TDep1, TDep2>(Predicate<TPayload> condition, Func<TPayload, TDep1, TDep2, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses three dependencies.
@@ -223,11 +223,11 @@ public class MediumBuilder<TPayload>
     /// <typeparam name="TDep3">The type of the third dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> Use<TDep1, TDep2, TDep3>(Func<TPayload, TDep1, TDep2, TDep3, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> Use<TDep1, TDep2, TDep3>(Func<TPayload, TDep1, TDep2, TDep3, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next)));
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses three dependencies.
@@ -238,11 +238,11 @@ public class MediumBuilder<TPayload>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload}"/> instance.</returns>
-    public MediumBuilder<TPayload> UseWhen<TDep1, TDep2, TDep3>(Predicate<TPayload> condition, Func<TPayload, TDep1, TDep2, TDep3, NextAsyncMiddlewareDelegate, Task> middleware)
+    public MediumBuilder<TPayload> UseWhen<TDep1, TDep2, TDep3>(Predicate<TPayload> condition, Func<TPayload, TDep1, TDep2, TDep3, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TPayload>((sp, next) => payload => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload>((sp, next) => (payload, ct) => middleware(payload, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware function to the Medium.
@@ -510,7 +510,7 @@ public class MediumBuilder<TPayload, TResult>
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> Use(Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> Use(Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         => Use(new ComponentDescriptor<TPayload, TResult>(middleware));
 
     /// <summary>
@@ -519,7 +519,7 @@ public class MediumBuilder<TPayload, TResult>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> UseWhen(Predicate<TPayload> condition, Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> UseWhen(Predicate<TPayload> condition, Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         => Use(new ComponentDescriptor<TPayload, TResult>(middleware) { Condition = condition });
 
     /// <summary>
@@ -527,7 +527,7 @@ public class MediumBuilder<TPayload, TResult>
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> Use(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> Use(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         => Use(new ComponentDescriptor<TPayload, TResult>(middleware));
 
     /// <summary>
@@ -536,7 +536,7 @@ public class MediumBuilder<TPayload, TResult>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> UseWhen(Predicate<TPayload> condition, Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> UseWhen(Predicate<TPayload> condition, Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         => Use(new ComponentDescriptor<TPayload, TResult>(middleware) { Condition = condition });
 
     /// <summary>
@@ -545,9 +545,9 @@ public class MediumBuilder<TPayload, TResult>
     /// <typeparam name="TDep">The type of the dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> Use<TDep>(Func<TDep, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> Use<TDep>(Func<TDep, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep>(), payload, next)));
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep>(), payload, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a dependency.
@@ -556,9 +556,9 @@ public class MediumBuilder<TPayload, TResult>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> UseWhen<TDep>(Predicate<TPayload> condition, Func<TDep, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> UseWhen<TDep>(Predicate<TPayload> condition, Func<TDep, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep>(), payload, next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep>(), payload, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses two dependencies.
@@ -567,10 +567,10 @@ public class MediumBuilder<TPayload, TResult>
     /// <typeparam name="TDep2">The type of the second dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> Use<TDep1, TDep2>(Func<TDep1, TDep2, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> Use<TDep1, TDep2>(Func<TDep1, TDep2, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), payload, next)));
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), payload, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses two dependencies.
@@ -580,10 +580,10 @@ public class MediumBuilder<TPayload, TResult>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> UseWhen<TDep1, TDep2>(Predicate<TPayload> condition, Func<TDep1, TDep2, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> UseWhen<TDep1, TDep2>(Predicate<TPayload> condition, Func<TDep1, TDep2, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), payload, next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), payload, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses three dependencies.
@@ -593,11 +593,11 @@ public class MediumBuilder<TPayload, TResult>
     /// <typeparam name="TDep3">The type of the third dependency.</typeparam>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> Use<TDep1, TDep2, TDep3>(Func<TDep1, TDep2, TDep3, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> Use<TDep1, TDep2, TDep3>(Func<TDep1, TDep2, TDep3, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), payload, next)));
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), payload, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses three dependencies.
@@ -608,11 +608,11 @@ public class MediumBuilder<TPayload, TResult>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TPayload, TResult}"/> instance.</returns>
-    public MediumBuilder<TPayload, TResult> UseWhen<TDep1, TDep2, TDep3>(Predicate<TPayload> condition, Func<TDep1, TDep2, TDep3, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
+    public MediumBuilder<TPayload, TResult> UseWhen<TDep1, TDep2, TDep3>(Predicate<TPayload> condition, Func<TDep1, TDep2, TDep3, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => payload => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), payload, next)) { Condition = condition });
+        => Use(new ComponentDescriptor<TPayload, TResult>((sp, next) => (payload, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), payload, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware function to the Medium.

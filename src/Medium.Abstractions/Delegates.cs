@@ -21,7 +21,7 @@ public delegate void MiddlewareDelegate<in TPayload>(TPayload payload);
 /// <typeparam name="TPayload">The type of the payload.</typeparam>
 /// <param name="payload">The payload to be processed.</param>
 /// <returns>A task representing the asynchronous operation.</returns>
-public delegate Task AsyncMiddlewareDelegate<in TPayload>(TPayload payload);
+public delegate Task AsyncMiddlewareDelegate<in TPayload>(TPayload payload, CancellationToken cancellationToken = default);
 
 /// <summary>
 /// Represents the delegate for a middleware function that returns a middleware delegate.
@@ -84,7 +84,7 @@ public delegate TResult MiddlewareDelegate<in TPayload, TResult>(TPayload payloa
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <param name="payload">The payload to be processed.</param>
 /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-public delegate Task<TResult> AsyncMiddlewareDelegate<in TPayload, TResult>(TPayload payload);
+public delegate Task<TResult> AsyncMiddlewareDelegate<in TPayload, TResult>(TPayload payload, CancellationToken cancellationToken = default);
 
 /// <summary>
 /// Represents the delegate for a middleware function that returns a middleware delegate with a result.

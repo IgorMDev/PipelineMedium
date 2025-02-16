@@ -5,7 +5,7 @@ namespace Medium.Tests.Middlewares;
 
 internal class CheckupAsyncMiddleware : IAsyncMiddleware<CheckupPayload>
 {
-    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next)
+    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         payload.IsInvokedAsync = true;
         return next();
@@ -23,7 +23,7 @@ internal class CheckupMiddleware : IMiddleware<CheckupPayload>
 
 internal class CheckupExceptionAsyncMiddleware : IAsyncMiddleware<CheckupPayload>
 {
-    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next)
+    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         throw new CheckupException();
     }
@@ -39,7 +39,7 @@ internal class CheckupExceptionMiddleware : IMiddleware<CheckupPayload>
 
 internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupPayload, CheckupResult>
 {
-    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next)
+    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         return Task.FromResult(new CheckupResult {
             IsInvokedAsync = true
@@ -59,7 +59,7 @@ internal class CheckupResultMiddleware : IMiddleware<CheckupPayload, CheckupResu
 
 internal class CheckupResultExceptionAsyncMiddleware : IAsyncMiddleware<CheckupPayload, CheckupResult>
 {
-    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next)
+    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         throw new CheckupException();
     }
@@ -75,7 +75,7 @@ internal class CheckupResultExceptionMiddleware : IMiddleware<CheckupPayload, Ch
 
 internal class CheckupAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupPayload>
 {
-    public async Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next)
+    public async Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         await checkupService.CheckupAsync(payload);
         await next();
@@ -93,7 +93,7 @@ internal class CheckupMiddlewareSP(CheckupService checkupService) : IMiddleware<
 
 internal class CheckupResultAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupPayload, CheckupResult>
 {
-    public async Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next)
+    public async Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         return await checkupService.CheckupResultAsync();
     }

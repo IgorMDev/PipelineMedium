@@ -134,9 +134,9 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     {
         AsyncMiddlewareSPFunc<TPayload>? asyncMiddlewareAction = default;
         if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TPayload>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            asyncMiddlewareAction = (sp, next) => p => {
+            asyncMiddlewareAction = (sp, next) => (p, ct) => {
                 var middleware = (IAsyncMiddleware<TPayload>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                return middleware.InvokeAsync(p, next);
+                return middleware.InvokeAsync(p, next, ct);
             };
         }
         else {
@@ -186,7 +186,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// <returns>The bound asynchronous middleware delegate.</returns>
     private static ContextualAsyncMiddlewareDelegate<TPayload> BindAsync(AsyncMiddlewareSPFunc<TPayload> middleware, ContextualAsyncMiddlewareDelegate<TPayload> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload, context.CancellationToken);
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
         return context => middleware(context.ServiceProvider, () => {
             next(context);
             return Task.CompletedTask;
-        })(context.Payload);
+        })(context.Payload, context.CancellationToken);
     }
 
     /// <summary>
@@ -350,9 +350,9 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     {
         AsyncMiddlewareSPFunc<TPayload, TResult>? asyncMiddlewareFunc = default;
         if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TPayload, TResult>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            asyncMiddlewareFunc = (sp, next) => p => {
+            asyncMiddlewareFunc = (sp, next) => (p, ct) => {
                 var middleware = (IAsyncMiddleware<TPayload, TResult>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                return middleware.InvokeAsync(p, next);
+                return middleware.InvokeAsync(p, next, ct);
             };
         }
         else {
@@ -402,7 +402,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <returns>The bound asynchronous middleware delegate.</returns>
     private static ContextualAsyncMiddlewareDelegate<TPayload, TResult> BindAsync(AsyncMiddlewareSPFunc<TPayload, TResult> middleware, ContextualAsyncMiddlewareDelegate<TPayload, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload, context.CancellationToken);
     }
 
     /// <summary>
@@ -413,7 +413,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <returns>The bound asynchronous middleware delegate.</returns>
     private static ContextualAsyncMiddlewareDelegate<TPayload, TResult> BindAsync(AsyncMiddlewareSPFunc<TPayload, TResult> middleware, ContextualMiddlewareDelegate<TPayload, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => Task.FromResult(next(context)))(context.Payload);
+        return context => middleware(context.ServiceProvider, () => Task.FromResult(next(context)))(context.Payload, context.CancellationToken);
     }
 
     /// <summary>

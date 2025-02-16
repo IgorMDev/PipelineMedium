@@ -12,7 +12,7 @@ public interface IAsyncMiddleware<TPayload>
     /// <param name="payload">The payload to be processed.</param>
     /// <param name="next">The delegate representing the next middleware in the pipeline.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task InvokeAsync(TPayload payload, NextAsyncMiddlewareDelegate next);
+    Task InvokeAsync(TPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -42,7 +42,7 @@ public interface IAsyncMiddleware<TPayload, TResult>
     /// <param name="payload">The payload to be processed.</param>
     /// <param name="next">The delegate representing the next middleware in the pipeline.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> InvokeAsync(TPayload payload, NextAsyncMiddlewareDelegate<TResult> next);
+    Task<TResult> InvokeAsync(TPayload payload, NextAsyncMiddlewareDelegate<TResult> next, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

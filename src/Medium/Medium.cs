@@ -11,10 +11,10 @@ public class Medium(IServiceProvider serviceProvider) : IMedium
     internal const string DefaultName = "Default";
 
     /// <inheritdoc />
-    public Task ExecuteAsync<TPayload>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(name, payload);
+    public Task ExecuteAsync<TPayload>(string name, TPayload payload, CancellationToken cancellationToken = default) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(name, payload, cancellationToken);
 
     /// <inheritdoc />
-    public Task ExecuteAsync<TPayload>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(payload);
+    public Task ExecuteAsync<TPayload>(TPayload payload, CancellationToken cancellationToken = default) => serviceProvider.GetRequiredService<IMedium<TPayload>>().ExecuteAsync(payload, cancellationToken);
 
     /// <inheritdoc />
     public void Execute<TPayload>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().Execute(name, payload);
@@ -23,10 +23,10 @@ public class Medium(IServiceProvider serviceProvider) : IMedium
     public void Execute<TPayload>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload>>().Execute(payload);
 
     /// <inheritdoc />
-    public Task<TResult> ExecuteAsync<TPayload, TResult>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(name, payload);
+    public Task<TResult> ExecuteAsync<TPayload, TResult>(string name, TPayload payload, CancellationToken cancellationToken = default) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(name, payload, cancellationToken);
 
     /// <inheritdoc />
-    public Task<TResult> ExecuteAsync<TPayload, TResult>(TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(payload);
+    public Task<TResult> ExecuteAsync<TPayload, TResult>(TPayload payload, CancellationToken cancellationToken = default) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().ExecuteAsync(payload, cancellationToken);
 
     /// <inheritdoc />
     public TResult Execute<TPayload, TResult>(string name, TPayload payload) => serviceProvider.GetRequiredService<IMedium<TPayload, TResult>>().Execute(name, payload);
@@ -59,17 +59,20 @@ public class Medium<TPayload>(
     }
 
     /// <inheritdoc />
-    public Task ExecuteAsync(string name, TPayload payload)
+    public Task ExecuteAsync(string name, TPayload payload, CancellationToken cancellationToken = default)
     {
         if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
             _asyncMiddlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetAsyncMiddlewareDelegate();
 
-        MediumContext<TPayload> context = new(serviceProvider, payload);
+        MediumContext<TPayload> context = new(serviceProvider, payload)
+        {
+            CancellationToken = cancellationToken
+        };
         return middlewareDelegate(context);
     }
 
     /// <inheritdoc />
-    public Task ExecuteAsync(TPayload payload) => ExecuteAsync(Medium.DefaultName, payload);
+    public Task ExecuteAsync(TPayload payload, CancellationToken cancellationToken = default) => ExecuteAsync(Medium.DefaultName, payload, cancellationToken);
 
     /// <inheritdoc />
     public void Execute(string name, TPayload payload)
@@ -110,17 +113,20 @@ public class Medium<TPayload, TResult>(
     }
 
     /// <inheritdoc />
-    public Task<TResult> ExecuteAsync(string name, TPayload payload)
+    public Task<TResult> ExecuteAsync(string name, TPayload payload, CancellationToken cancellationToken = default)
     {
         if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
             _asyncMiddlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetAsyncMiddlewareDelegate();
 
-        MediumContext<TPayload, TResult> context = new(serviceProvider, payload);
+        MediumContext<TPayload, TResult> context = new(serviceProvider, payload)
+        {
+            CancellationToken = cancellationToken
+        };
         return middlewareDelegate(context);
     }
 
     /// <inheritdoc />
-    public Task<TResult> ExecuteAsync(TPayload payload) => ExecuteAsync(Medium.DefaultName, payload);
+    public Task<TResult> ExecuteAsync(TPayload payload, CancellationToken cancellationToken = default) => ExecuteAsync(Medium.DefaultName, payload, cancellationToken);
 
     /// <inheritdoc />
     public TResult Execute(string name, TPayload payload)

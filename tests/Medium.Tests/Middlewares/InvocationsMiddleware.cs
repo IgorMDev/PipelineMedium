@@ -4,13 +4,13 @@ namespace Medium.Tests.Middlewares;
 
 internal class Invocation1AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next)
+    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
         return next();
     }
 
-    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next)
+    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
 
@@ -22,13 +22,13 @@ internal class Invocation1AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>
 }
 internal class Invocation2AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next)
+    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
         return next();
     }
 
-    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next)
+    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
 
@@ -40,13 +40,13 @@ internal class Invocation2AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>
 }
 internal class InvocationTerminateAsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next)
+    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
         return Task.CompletedTask;
     }
 
-    public Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next)
+    public Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
         payload.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
 

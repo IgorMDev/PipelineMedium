@@ -43,16 +43,16 @@ public class ComponentDescriptor<TPayload>
     /// Initializes a new instance of the <see cref="ComponentDescriptor{TPayload}"/> class with an asynchronous middleware delegate.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
-        : this((_, next) => payload => middleware(payload, next))
+    public ComponentDescriptor(Func<TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
+        : this((_, next) => (payload, ct) => middleware(payload, next, ct))
     { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ComponentDescriptor{TPayload}"/> class with an asynchronous middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, Task> middleware)
-        : this((sp, next) => payload => middleware(sp, payload, next))
+    public ComponentDescriptor(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
+        : this((sp, next) => (payload, ct) => middleware(sp, payload, next, ct))
     { }
 
     /// <summary>
@@ -127,7 +127,7 @@ public class TerminateComponentDescriptor<TPayload>
     internal TerminateComponentDescriptor()
     {
         Action = _ => { };
-        AsyncAction = _ => Task.CompletedTask;
+        AsyncAction = (_, _) => Task.CompletedTask;
     }
 
     /// <summary>
@@ -210,16 +210,16 @@ public class ComponentDescriptor<TPayload, TResult>
     /// Initializes a new instance of the <see cref="ComponentDescriptor{TPayload, TResult}"/> class with an asynchronous middleware delegate.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
-        : this((_, next) => payload => middleware(payload, next))
+    public ComponentDescriptor(Func<TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
+        : this((_, next) => (payload, ct) => middleware(payload, next, ct))
     { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ComponentDescriptor{TPayload, TResult}"/> class with an asynchronous middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, Task<TResult>> middleware)
-        : this((sp, next) => payload => middleware(sp, payload, next))
+    public ComponentDescriptor(Func<IServiceProvider, TPayload, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
+        : this((sp, next) => (payload, ct) => middleware(sp, payload, next, ct))
     { }
 
     /// <summary>
@@ -295,7 +295,7 @@ public class TerminateComponentDescriptor<TPayload, TResult>
     internal TerminateComponentDescriptor()
     {
         Func = _ => default!;
-        AsyncFunc = _ => Task.FromResult<TResult>(default!);
+        AsyncFunc = (_, _) => Task.FromResult<TResult>(default!);
     }
 
     /// <summary>

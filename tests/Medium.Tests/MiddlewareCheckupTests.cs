@@ -165,7 +165,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFunc()
     {
-        var medium = CreateMedium(b => b.Use((p, next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             p.IsInvokedAsync = true;
             return next();
         }));
@@ -195,7 +195,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             throw new CheckupException();
         }));
 
@@ -207,7 +207,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextMiddlewareDelegate next) => {
+        var medium = CreateMedium(b => b.Use((p, next) => {
             throw new CheckupException();
         }));
 
@@ -219,7 +219,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public void Execute_InvokeAsyncMiddlewareFunc()
     {
-        var medium = CreateMedium(b => b.Use((p, next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             p.IsInvokedAsync = true;
             return next();
         }));
@@ -249,7 +249,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public void Execute_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             throw new CheckupException();
         }));
 
@@ -261,7 +261,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public void Execute_InvokeMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextMiddlewareDelegate next) => {
+        var medium = CreateMedium(b => b.Use((p, next) => {
             throw new CheckupException();
         }));
 
@@ -273,7 +273,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFuncWithSP()
     {
-        var medium = CreateMedium(b => b.Use(async (sp, p, next) => {
+        var medium = CreateMedium(b => b.Use(async (sp, p, next, _) => {
             var chService = sp.GetRequiredService<CheckupService>();
             await chService.CheckupAsync(p);
             await next();
@@ -305,7 +305,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFuncWithService()
     {
-        var medium = CreateMedium(b => b.Use<CheckupService>(async (p, chService, next) => {
+        var medium = CreateMedium(b => b.Use<CheckupService>(async (p, chService, next, _) => {
             await chService.CheckupAsync(p);
             await next();
         }));
@@ -335,7 +335,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeDefaultAsyncMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault(p => {
+        var medium = CreateMedium(b => b.SetDefault((p, _) => {
             p.IsInvokedAsync = true;
             return Task.CompletedTask;
         }));
@@ -519,7 +519,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFunc()
     {
-        var medium = CreateMedium(b => b.Use((p, next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             return Task.FromResult(new CheckupResult {
                 IsInvokedAsync = true
             });
@@ -551,7 +551,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next) => {
+        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
             throw new CheckupException();
         }));
 
@@ -563,7 +563,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextMiddlewareDelegate<CheckupResult> next) => {
+        var medium = CreateMedium(b => b.Use((p, next) => {
             throw new CheckupException();
         }));
 
@@ -575,7 +575,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public void Execute_InvokeAsyncMiddlewareFunc()
     {
-        var medium = CreateMedium(b => b.Use((p, next) => {
+        var medium = CreateMedium(b => b.Use((p, next, _) => {
             return Task.FromResult(new CheckupResult {
                 IsInvokedAsync = true
             });
@@ -607,7 +607,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public void Execute_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next) => {
+        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
             throw new CheckupException();
         }));
 
@@ -619,7 +619,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public void Execute_InvokeMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextMiddlewareDelegate<CheckupResult> next) => {
+        var medium = CreateMedium(b => b.Use((p, next) => {
             throw new CheckupException();
         }));
 
@@ -631,7 +631,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFuncWithSP()
     {
-        var medium = CreateMedium(b => b.Use(async (sp, p, next) => {
+        var medium = CreateMedium(b => b.Use(async (sp, p, next, _) => {
             var chService = sp.GetRequiredService<CheckupService>();
             return await chService.CheckupResultAsync();
         }));
@@ -661,7 +661,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFuncWithService()
     {
-        var medium = CreateMedium(b => b.Use<CheckupService>(async (chService, p, next) => {
+        var medium = CreateMedium(b => b.Use<CheckupService>(async (chService, p, next, _) => {
             return await chService.CheckupResultAsync();
         }));
 
@@ -689,7 +689,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeDefaultAsyncMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault(p => {
+        var medium = CreateMedium(b => b.SetDefault((p, _) => {
             return Task.FromResult(new CheckupResult { IsInvokedAsync = true });
         }));
 

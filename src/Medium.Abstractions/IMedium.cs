@@ -12,7 +12,7 @@ public interface IMedium
     /// <param name="name">The name of the operation.</param>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ExecuteAsync<TPayload>(string name, TPayload payload);
+    Task ExecuteAsync<TPayload>(string name, TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an asynchronous operation with a payload.
@@ -20,7 +20,7 @@ public interface IMedium
     /// <typeparam name="TPayload">The type of the payload.</typeparam>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ExecuteAsync<TPayload>(TPayload payload);
+    Task ExecuteAsync<TPayload>(TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an operation with a specified name and payload.
@@ -45,7 +45,7 @@ public interface IMedium
     /// <param name="name">The name of the operation.</param>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync<TPayload, TResult>(string name, TPayload payload);
+    Task<TResult> ExecuteAsync<TPayload, TResult>(string name, TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an asynchronous operation with a payload, and returns a result.
@@ -54,7 +54,7 @@ public interface IMedium
     /// <typeparam name="TResult">The type of the result.</typeparam>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync<TPayload, TResult>(TPayload payload);
+    Task<TResult> ExecuteAsync<TPayload, TResult>(TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an operation with a specified name and payload, and returns a result.
@@ -88,14 +88,14 @@ public interface IMedium<TPayload>
     /// <param name="name">The name of the operation.</param>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ExecuteAsync(string name, TPayload payload);
+    Task ExecuteAsync(string name, TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an asynchronous operation with a payload.
     /// </summary>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ExecuteAsync(TPayload payload);
+    Task ExecuteAsync(TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an operation with a specified name and payload.
@@ -124,14 +124,14 @@ public interface IMedium<TPayload, TResult>
     /// <param name="name">The name of the operation.</param>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync(string name, TPayload payload);
+    Task<TResult> ExecuteAsync(string name, TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an asynchronous operation with a payload, and returns a result.
     /// </summary>
     /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync(TPayload payload);
+    Task<TResult> ExecuteAsync(TPayload payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes an operation with a specified name and payload, and returns a result.
