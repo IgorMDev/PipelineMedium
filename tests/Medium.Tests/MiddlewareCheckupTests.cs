@@ -320,7 +320,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public void Execute_InvokeMiddlewareFuncWithService()
     {
-        var medium = CreateMedium(b => b.Use<CheckupService>((p, chService, next) => {
+        var medium = CreateMedium(b => b.Use<CheckupService>((chService ,p, next) => {
             chService.Checkup(p);
             next();
         }));
@@ -661,7 +661,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFuncWithService()
     {
-        var medium = CreateMedium(b => b.Use<CheckupService>(async (p, chService, next) => {
+        var medium = CreateMedium(b => b.Use<CheckupService>(async (chService, p, next) => {
             return await chService.CheckupResultAsync();
         }));
 
