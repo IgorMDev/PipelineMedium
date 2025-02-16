@@ -122,29 +122,29 @@ public interface IMedium<TPayload, TResult>
     /// Executes an asynchronous operation with a specified name and payload, and returns a result.
     /// </summary>
     /// <param name="name">The name of the operation.</param>
-    /// <param name="input">The payload to be processed.</param>
+    /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync(string name, TPayload input);
+    Task<TResult> ExecuteAsync(string name, TPayload payload);
 
     /// <summary>
     /// Executes an asynchronous operation with a payload, and returns a result.
     /// </summary>
-    /// <param name="input">The payload to be processed.</param>
+    /// <param name="payload">The payload to be processed.</param>
     /// <returns>A task representing the asynchronous operation, with a result of type <typeparamref name="TResult"/>.</returns>
-    Task<TResult> ExecuteAsync(TPayload input);
+    Task<TResult> ExecuteAsync(TPayload payload);
 
     /// <summary>
     /// Executes an operation with a specified name and payload, and returns a result.
     /// </summary>
     /// <param name="name">The name of the operation.</param>
-    /// <param name="input">The payload to be processed.</param>
+    /// <param name="payload">The payload to be processed.</param>
     /// <returns>The result of the operation of type <typeparamref name="TResult"/>.</returns>
-    TResult Execute(string name, TPayload input);
+    TResult Execute(string name, TPayload payload);
 
     /// <summary>
     /// Executes an operation with a payload, and returns a result.
     /// </summary>
-    /// <param name="input">The payload to be processed.</param>
+    /// <param name="payload">The payload to be processed.</param>
     /// <returns>The result of the operation of type <typeparamref name="TResult"/>.</returns>
-    TResult Execute(TPayload input);
+    TResult Execute(TPayload payload);
 }
