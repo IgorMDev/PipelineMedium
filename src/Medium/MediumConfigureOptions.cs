@@ -9,7 +9,13 @@ public class MediumConfigureOptions<TPayload> : ConfigureNamedOptions<MediumOpti
         o.TerminateComponent = options.TerminateComponent;
     })
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(options);
+#else
+        if (options is null) {
+            throw new ArgumentNullException(nameof(options));
+        }
+#endif
     }
 }
 
@@ -20,6 +26,12 @@ public class MediumConfigureOptions<TPayload, TResult> : ConfigureNamedOptions<M
         o.TerminateComponent = options.TerminateComponent;
     })
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(options);
+#else
+        if (options is null) {
+            throw new ArgumentNullException(nameof(options));
+        }
+#endif
     }
 }

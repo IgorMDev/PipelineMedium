@@ -13,10 +13,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     private ContextualAsyncMiddlewareDelegate<TPayload>? AsyncMiddlewareDelegate;
     private ContextualMiddlewareDelegate<TPayload>? MiddlewareDelegate;
 
-    /// <summary>
-    /// Gets the asynchronous middleware delegate.
-    /// </summary>
-    /// <returns>The asynchronous middleware delegate.</returns>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
     public ContextualAsyncMiddlewareDelegate<TPayload> GetAsyncMiddlewareDelegate()
     {
@@ -31,10 +28,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
         throw new InvalidOperationException(Errors.MiddlewareNotDefined);
     }
 
-    /// <summary>
-    /// Gets the middleware delegate.
-    /// </summary>
-    /// <returns>The middleware delegate.</returns>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
     public ContextualMiddlewareDelegate<TPayload> GetMiddlewareDelegate()
     {
@@ -45,12 +39,8 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
 
         throw new InvalidOperationException(Errors.MiddlewareNotDefined);
     }
-
-    /// <summary>
-    /// Initializes the binder with a terminate component descriptor.
-    /// </summary>
-    /// <param name="descriptor">The terminate component descriptor.</param>
-    /// <returns>The current <see cref="IComponentBinder{TPayload}"/> instance.</returns>
+    
+    /// <inheritdoc/>
     public IComponentBinder<TPayload> Init(TerminateComponentDescriptor<TPayload> descriptor)
     {
         if(descriptor.AsyncAction != null) {
@@ -71,11 +61,18 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
         return this;
     }
 
-    /// <summary>
-    /// Binds a single component to the binder using the specified descriptor.
-    /// </summary>
-    /// <param name="descriptor">The component descriptor.</param>
-    /// <returns>The current <see cref="IComponentBinder{TPayload}"/> instance.</returns>
+#if NETSTANDARD2_0
+    /// <inheritdoc/>
+    public IComponentBinder<TPayload> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload>> descriptors)
+    {
+        foreach (var descriptor in descriptors)
+            BindToComponent(descriptor);
+
+        return this;
+    }
+#endif
+
+    /// <inheritdoc/>
     public IComponentBinder<TPayload> BindToComponent(ComponentDescriptor<TPayload> descriptor)
     {
         var asyncMiddlewareDelegate = BindToAsyncDelegate(descriptor);
@@ -237,10 +234,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     protected ContextualAsyncMiddlewareDelegate<TPayload, TResult>? AsyncMiddlewareDelegate;
     protected ContextualMiddlewareDelegate<TPayload, TResult>? MiddlewareDelegate;
 
-    /// <summary>
-    /// Gets the asynchronous middleware delegate.
-    /// </summary>
-    /// <returns>The asynchronous middleware delegate.</returns>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
     public ContextualAsyncMiddlewareDelegate<TPayload, TResult> GetAsyncMiddlewareDelegate()
     {
@@ -252,10 +246,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
         throw new InvalidOperationException(Errors.MiddlewareNotDefined);
     }
 
-    /// <summary>
-    /// Gets the middleware delegate.
-    /// </summary>
-    /// <returns>The middleware delegate.</returns>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
     public ContextualMiddlewareDelegate<TPayload, TResult> GetMiddlewareDelegate()
     {
@@ -267,11 +258,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
         throw new InvalidOperationException(Errors.MiddlewareNotDefined);
     }
 
-    /// <summary>
-    /// Initializes the binder with a terminate component descriptor.
-    /// </summary>
-    /// <param name="descriptor">The terminate component descriptor.</param>
-    /// <returns>The current <see cref="IComponentBinder{TPayload, TResult}"/> instance.</returns>
+    /// <inheritdoc/>
     public IComponentBinder<TPayload, TResult> Init(TerminateComponentDescriptor<TPayload, TResult> descriptor)
     {
         if(descriptor.AsyncFunc is not null) {
@@ -291,11 +278,18 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
         return this;
     }
 
-    /// <summary>
-    /// Binds a single component to the binder using the specified descriptor.
-    /// </summary>
-    /// <param name="descriptor">The component descriptor.</param>
-    /// <returns>The current <see cref="IComponentBinder{TPayload, TResult}"/> instance.</returns>
+#if NETSTANDARD2_0
+    /// <inheritdoc/>
+    public IComponentBinder<TPayload, TResult> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload, TResult>> descriptors)
+    {
+        foreach (var descriptor in descriptors)
+            BindToComponent(descriptor);
+
+        return this;
+    }
+#endif
+
+    /// <inheritdoc/>
     public IComponentBinder<TPayload, TResult> BindToComponent(ComponentDescriptor<TPayload, TResult> descriptor)
     {
         var asyncMiddlewareDelegate = BindToAsyncDelegate(descriptor);

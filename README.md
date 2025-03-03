@@ -1,12 +1,10 @@
-# Medium
-
-Medium is set of classes and interfaces that provides a flexible and extensible solution of middleware pipeline pattern.
+PipelineMedium is set of classes and interfaces that provides a flexible and extensible solution of middleware pipeline pattern.
 
 ## Installing
 
 You can install it with NuGet:
 
-    dotnet add package IMD.Medium
+    dotnet add package PipelineMedium
 
 ## Concepts
 

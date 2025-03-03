@@ -58,7 +58,13 @@ public static class ServiceCollectionExtensions
     /// <returns>A <see cref="MediumBuilder{TPayload}"/> for configuring the Medium.</returns>
     public static MediumBuilder<TPayload> AddMedium<TPayload>(this IServiceCollection services, string name)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(name);
+#else
+        if (name is null) {
+            throw new ArgumentNullException(nameof(name));
+        }
+#endif  
 
         services.AddMediumServices<TPayload>();
 
@@ -88,7 +94,13 @@ public static class ServiceCollectionExtensions
     /// <returns>A <see cref="MediumBuilder{TPayload, TResult}"/> for configuring the Medium.</returns>
     public static MediumBuilder<TPayload, TResult> AddMedium<TPayload, TResult>(this IServiceCollection services, string name)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(name);
+#else
+        if (name is null) {
+            throw new ArgumentNullException(nameof(name));
+        }
+#endif  
 
         services.AddMediumServices<TPayload, TResult>();
 
