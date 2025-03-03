@@ -1,12 +1,10 @@
-# Medium
-
-Medium is set of classes and interfaces that provides a flexible and extensible solution of middleware pipeline pattern.
+PipelineMedium is set of classes and interfaces that provides a flexible and extensible solution of middleware pipeline pattern.
 
 ## Installing
 
 You can install it with NuGet:
 
-    dotnet add package IMD.Medium
+    dotnet add package PipelineMedium
 
 ## Concepts
 
@@ -68,12 +66,12 @@ public class AsyncMiddleware(IDependency dependency) : IAsyncMiddleware<Payload>
 //in-line middleware functions
 services.AddMedium<Payload>()
     .Use((payload, next) => { /* code */ })
-    .Use((serviceProvider, payload, next) => { /* code */ }); //with IServiceProvider
+    .Use((serviceProvider, payload, next) => { /* code */ }) //with IServiceProvider
     .Use<Dependency>((dependency, payload, next) => { /* code */ }); //with Dependency provided
 
 services.AddMedium<Payload, Result>()
     .Use((payload, next) => { /* code */ })
-    .Use((serviceProvider, payload, next) => { /* code */ }); //with IServiceProvider
+    .Use((serviceProvider, payload, next) => { /* code */ }) //with IServiceProvider
     .Use<Dependency>((dependency, payload, next) => { /* code */ }); //with Dependency provided
 ```
 

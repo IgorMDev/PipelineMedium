@@ -25,6 +25,7 @@ public interface IComponentBinder<TPayload>
     /// <returns>The current <see cref="IComponentBinder{TPayload}"/> instance.</returns>
     IComponentBinder<TPayload> Init(TerminateComponentDescriptor<TPayload> descriptor);
 
+#if NET5_0_OR_GREATER
     /// <summary>
     /// Binds the components to the binder using the specified descriptors.
     /// </summary>
@@ -37,6 +38,14 @@ public interface IComponentBinder<TPayload>
 
         return this;
     }
+#else
+    /// <summary>
+    /// Binds the components to the binder using the specified descriptors.
+    /// </summary>
+    /// <param name="descriptors">The component descriptors.</param>
+    /// <returns>The current <see cref="IComponentBinder{TPayload}"/> instance.</returns>
+    IComponentBinder<TPayload> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload>> descriptors);
+#endif
 
     /// <summary>
     /// Binds a single component to the binder using the specified descriptor.
@@ -72,6 +81,7 @@ public interface IComponentBinder<TPayload, TResult>
     /// <returns>The current <see cref="IComponentBinder{TPayload, TResult}"/> instance.</returns>
     IComponentBinder<TPayload, TResult> Init(TerminateComponentDescriptor<TPayload, TResult> descriptor);
 
+#if NET5_0_OR_GREATER
     /// <summary>
     /// Binds the components to the binder using the specified descriptors.
     /// </summary>
@@ -84,6 +94,14 @@ public interface IComponentBinder<TPayload, TResult>
 
         return this;
     }
+#else
+    /// <summary>
+    /// Binds the components to the binder using the specified descriptors.
+    /// </summary>
+    /// <param name="descriptors">The component descriptors.</param>
+    /// <returns>The current <see cref="IComponentBinder{TPayload, TResult}"/> instance.</returns>
+    IComponentBinder<TPayload, TResult> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload, TResult>> descriptors);
+#endif
 
     /// <summary>
     /// Binds a single component to the binder using the specified descriptor.

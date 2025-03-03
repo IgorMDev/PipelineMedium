@@ -17,7 +17,13 @@ public class ComponentDescriptor<TPayload>
     /// <param name="middlewareType">The type of the middleware.</param>
     public ComponentDescriptor(Type middlewareType)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareType);
+#else
+        if (middlewareType is null) {
+            throw new ArgumentNullException(nameof(middlewareType));
+        }
+#endif        
         MiddlewareType = middlewareType;
     }
 
@@ -27,7 +33,13 @@ public class ComponentDescriptor<TPayload>
     /// <param name="middlewareAction">The asynchronous middleware action.</param>
     public ComponentDescriptor(AsyncMiddlewareSPFunc<TPayload> middlewareAction)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
+#else
+        if (middlewareAction is null) {
+            throw new ArgumentNullException(nameof(middlewareAction));
+        }
+#endif   
         AsyncMiddlewareAction = middlewareAction;
     }
 
@@ -61,7 +73,13 @@ public class ComponentDescriptor<TPayload>
     /// <param name="middlewareAction">The middleware action.</param>
     public ComponentDescriptor(MiddlewareSPFunc<TPayload> middlewareAction)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
+#else
+        if (middlewareAction is null) {
+            throw new ArgumentNullException(nameof(middlewareAction));
+        }
+#endif  
         MiddlewareAction = middlewareAction;
     }
 
@@ -136,7 +154,13 @@ public class TerminateComponentDescriptor<TPayload>
     /// <param name="middlewareAction">The asynchronous middleware action.</param>
     public TerminateComponentDescriptor(AsyncMiddlewareDelegate<TPayload> middlewareAction)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
+#else
+        if (middlewareAction is null) {
+            throw new ArgumentNullException(nameof(middlewareAction));
+        }
+#endif  
         AsyncAction = middlewareAction;
     }
 
@@ -146,7 +170,13 @@ public class TerminateComponentDescriptor<TPayload>
     /// <param name="middlewareAction">The middleware action.</param>
     public TerminateComponentDescriptor(MiddlewareDelegate<TPayload> middlewareAction)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
+#else
+        if (middlewareAction is null) {
+            throw new ArgumentNullException(nameof(middlewareAction));
+        }
+#endif  
         Action = middlewareAction;
     }
 
@@ -184,7 +214,13 @@ public class ComponentDescriptor<TPayload, TResult>
     /// <param name="middlewareType">The type of the middleware.</param>
     public ComponentDescriptor(Type middlewareType)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareType);
+#else
+        if (middlewareType is null) {
+            throw new ArgumentNullException(nameof(middlewareType));
+        }
+#endif   
         MiddlewareType = middlewareType;
     }
 
@@ -194,7 +230,13 @@ public class ComponentDescriptor<TPayload, TResult>
     /// <param name="middlewareFunc">The asynchronous middleware function.</param>
     public ComponentDescriptor(AsyncMiddlewareSPFunc<TPayload, TResult> middlewareFunc)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
+#else
+        if (middlewareFunc is null) {
+            throw new ArgumentNullException(nameof(middlewareFunc));
+        }
+#endif  
         AsyncMiddlewareFunc = middlewareFunc;
     }
 
@@ -228,7 +270,13 @@ public class ComponentDescriptor<TPayload, TResult>
     /// <param name="middlewareFunc">The middleware function.</param>
     public ComponentDescriptor(MiddlewareSPFunc<TPayload, TResult> middlewareFunc)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
+#else
+        if (middlewareFunc is null) {
+            throw new ArgumentNullException(nameof(middlewareFunc));
+        }
+#endif  
         MiddlewareFunc = middlewareFunc;
     }
 
@@ -304,7 +352,13 @@ public class TerminateComponentDescriptor<TPayload, TResult>
     /// <param name="middlewareFunc">The asynchronous middleware function.</param>
     public TerminateComponentDescriptor(AsyncMiddlewareDelegate<TPayload, TResult> middlewareFunc)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
+#else
+        if (middlewareFunc is null) {
+            throw new ArgumentNullException(nameof(middlewareFunc));
+        }
+#endif  
         AsyncFunc = middlewareFunc;
     }
 
@@ -314,7 +368,13 @@ public class TerminateComponentDescriptor<TPayload, TResult>
     /// <param name="middlewareFunc">The middleware function.</param>
     public TerminateComponentDescriptor(MiddlewareDelegate<TPayload, TResult> middlewareFunc)
     {
+#if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
+#else
+        if (middlewareFunc is null) {
+            throw new ArgumentNullException(nameof(middlewareFunc));
+        }
+#endif  
         Func = middlewareFunc;
     }
 
