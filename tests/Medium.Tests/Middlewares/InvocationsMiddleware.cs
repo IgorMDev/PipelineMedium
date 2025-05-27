@@ -1,18 +1,18 @@
-﻿using Medium.Tests.Payloads;
+﻿using Medium.Tests.Requests;
 
 namespace Medium.Tests.Middlewares;
 
-internal class Invocation1AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
+internal class Invocation1AsyncMiddleware : IAsyncMiddleware<InvocationsRequest>, IAsyncMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public Task InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
+        request.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
         return next();
     }
 
-    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
+    public async Task<InvocationsResult> InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
+        request.InvocationList.Add(nameof(Invocation1AsyncMiddleware));
 
         var res = await next();
         res ??= new();
@@ -20,17 +20,17 @@ internal class Invocation1AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>
         return res;
     }
 }
-internal class Invocation2AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
+internal class Invocation2AsyncMiddleware : IAsyncMiddleware<InvocationsRequest>, IAsyncMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public Task InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
+        request.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
         return next();
     }
 
-    public async Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
+    public async Task<InvocationsResult> InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
+        request.InvocationList.Add(nameof(Invocation2AsyncMiddleware));
 
         var res = await next();
         res ??= new();
@@ -38,17 +38,17 @@ internal class Invocation2AsyncMiddleware : IAsyncMiddleware<InvocationsPayload>
         return res;
     }
 }
-internal class InvocationTerminateAsyncMiddleware : IAsyncMiddleware<InvocationsPayload>, IAsyncMiddleware<InvocationsPayload, InvocationsResult>
+internal class InvocationTerminateAsyncMiddleware : IAsyncMiddleware<InvocationsRequest>, IAsyncMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public Task InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public Task InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
+        request.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
         return Task.CompletedTask;
     }
 
-    public Task<InvocationsResult> InvokeAsync(InvocationsPayload payload, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
+    public Task<InvocationsResult> InvokeAsync(InvocationsRequest request, NextAsyncMiddlewareDelegate<InvocationsResult> next, CancellationToken cancellationToken)
     {
-        payload.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
+        request.InvocationList.Add(nameof(InvocationTerminateAsyncMiddleware));
 
         return Task.FromResult(new InvocationsResult {
             InvocationList = [nameof(InvocationTerminateAsyncMiddleware)]
@@ -56,17 +56,17 @@ internal class InvocationTerminateAsyncMiddleware : IAsyncMiddleware<Invocations
     }
 }
 
-internal class Invocation1Middleware : IMiddleware<InvocationsPayload>, IMiddleware<InvocationsPayload, InvocationsResult>
+internal class Invocation1Middleware : IMiddleware<InvocationsRequest>, IMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public void Invoke(InvocationsPayload payload, NextMiddlewareDelegate next)
+    public void Invoke(InvocationsRequest request, NextMiddlewareDelegate next)
     {
-        payload.InvocationList.Add(nameof(Invocation1Middleware));
+        request.InvocationList.Add(nameof(Invocation1Middleware));
         next();
     }
 
-    public InvocationsResult Invoke(InvocationsPayload payload, NextMiddlewareDelegate<InvocationsResult> next)
+    public InvocationsResult Invoke(InvocationsRequest request, NextMiddlewareDelegate<InvocationsResult> next)
     {
-        payload.InvocationList.Add(nameof(Invocation1Middleware));
+        request.InvocationList.Add(nameof(Invocation1Middleware));
 
         var res = next();
         res ??= new();
@@ -74,17 +74,17 @@ internal class Invocation1Middleware : IMiddleware<InvocationsPayload>, IMiddlew
         return res;
     }
 }
-internal class Invocation2Middleware : IMiddleware<InvocationsPayload>, IMiddleware<InvocationsPayload, InvocationsResult>
+internal class Invocation2Middleware : IMiddleware<InvocationsRequest>, IMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public void Invoke(InvocationsPayload payload, NextMiddlewareDelegate next)
+    public void Invoke(InvocationsRequest request, NextMiddlewareDelegate next)
     {
-        payload.InvocationList.Add(nameof(Invocation2Middleware));
+        request.InvocationList.Add(nameof(Invocation2Middleware));
         next();
     }
 
-    public InvocationsResult Invoke(InvocationsPayload payload, NextMiddlewareDelegate<InvocationsResult> next)
+    public InvocationsResult Invoke(InvocationsRequest request, NextMiddlewareDelegate<InvocationsResult> next)
     {
-        payload.InvocationList.Add(nameof(Invocation2Middleware));
+        request.InvocationList.Add(nameof(Invocation2Middleware));
 
         var res = next();
         res ??= new();
@@ -92,17 +92,17 @@ internal class Invocation2Middleware : IMiddleware<InvocationsPayload>, IMiddlew
         return res;
     }
 }
-internal class InvocationTerminateMiddleware : IMiddleware<InvocationsPayload>, IMiddleware<InvocationsPayload, InvocationsResult>
+internal class InvocationTerminateMiddleware : IMiddleware<InvocationsRequest>, IMiddleware<InvocationsRequest, InvocationsResult>
 {
-    public void Invoke(InvocationsPayload payload, NextMiddlewareDelegate _)
+    public void Invoke(InvocationsRequest request, NextMiddlewareDelegate _)
     {
-        payload.InvocationList.Add(nameof(InvocationTerminateMiddleware));
+        request.InvocationList.Add(nameof(InvocationTerminateMiddleware));
         return;
     }
 
-    public InvocationsResult Invoke(InvocationsPayload payload, NextMiddlewareDelegate<InvocationsResult> _)
+    public InvocationsResult Invoke(InvocationsRequest request, NextMiddlewareDelegate<InvocationsResult> _)
     {
-        payload.InvocationList.Add(nameof(InvocationTerminateMiddleware));
+        request.InvocationList.Add(nameof(InvocationTerminateMiddleware));
 
         return new InvocationsResult {
             InvocationList = [nameof(InvocationTerminateMiddleware)]

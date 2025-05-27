@@ -1,5 +1,5 @@
 ﻿using Medium.Tests.Middlewares;
-using Medium.Tests.Payloads;
+using Medium.Tests.Requests;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,17 +9,17 @@ namespace Medium.Tests;
 
 public class MiddlewarePipelineTests
 {
-    private static IMedium<InvocationsPayload> CreateMedium(Action<MediumBuilder<InvocationsPayload>>? mediumBuilderAction)
+    private static IMedium<InvocationsRequest> CreateMedium(Action<MediumBuilder<InvocationsRequest>>? mediumBuilderAction)
     {
         IServiceCollection services = new ServiceCollection();
         services.AddOptions();
-        var mediumBuilder = services.AddMedium<InvocationsPayload>();
+        var mediumBuilder = services.AddMedium<InvocationsRequest>();
 
         if(mediumBuilderAction is not null)
             mediumBuilderAction(mediumBuilder);
 
         var sp = services.BuildServiceProvider();
-        var medium = sp.GetRequiredService<IMedium<InvocationsPayload>>();
+        var medium = sp.GetRequiredService<IMedium<InvocationsRequest>>();
 
         return medium;
     }
@@ -32,10 +32,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation2AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1AsyncMiddleware), i),
             i => Assert.Equal(nameof(Invocation2AsyncMiddleware), i)
         );
@@ -49,10 +49,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation1AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation2AsyncMiddleware), i),
             i => Assert.Equal(nameof(Invocation1AsyncMiddleware), i)
         );
@@ -67,10 +67,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation2AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1AsyncMiddleware), i),
             i => Assert.Equal(nameof(InvocationTerminateAsyncMiddleware), i)
         );
@@ -84,10 +84,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation2Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        medium.Execute(payload);
+        var request = new InvocationsRequest();
+        medium.Execute(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1Middleware), i),
             i => Assert.Equal(nameof(Invocation2Middleware), i)
         );
@@ -101,10 +101,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation1Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        medium.Execute(payload);
+        var request = new InvocationsRequest();
+        medium.Execute(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation2Middleware), i),
             i => Assert.Equal(nameof(Invocation1Middleware), i)
         );
@@ -119,10 +119,10 @@ public class MiddlewarePipelineTests
             .Use<Invocation2Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        medium.Execute(payload);
+        var request = new InvocationsRequest();
+        medium.Execute(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1Middleware), i),
             i => Assert.Equal(nameof(InvocationTerminateMiddleware), i)
         );
@@ -137,10 +137,10 @@ public class MiddlewarePipelineTests
             .UseWhen<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
         );
 
-        var payload = new InvocationsPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1AsyncMiddleware), i),
             i => Assert.Equal(nameof(InvocationTerminateAsyncMiddleware), i)
         );
@@ -155,10 +155,10 @@ public class MiddlewarePipelineTests
             .UseWhen<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
         );
 
-        var payload = new InvocationsPayload();
-        medium.Execute(payload);
+        var request = new InvocationsRequest();
+        medium.Execute(request);
 
-        Assert.Collection(payload.InvocationList, 
+        Assert.Collection(request.InvocationList, 
             i => Assert.Equal(nameof(Invocation1Middleware), i),
             i => Assert.Equal(nameof(InvocationTerminateMiddleware), i)
         );
@@ -167,17 +167,17 @@ public class MiddlewarePipelineTests
 
 public class MiddlewareResultPipelineTests
 {
-    private static IMedium<InvocationsPayload, InvocationsResult> CreateMedium(Action<MediumBuilder<InvocationsPayload, InvocationsResult>>? mediumBuilderAction)
+    private static IMedium<InvocationsRequest, InvocationsResult> CreateMedium(Action<MediumBuilder<InvocationsRequest, InvocationsResult>>? mediumBuilderAction)
     {
         IServiceCollection services = new ServiceCollection();
         services.AddOptions();
-        var mediumBuilder = services.AddMedium<InvocationsPayload, InvocationsResult>();
+        var mediumBuilder = services.AddMedium<InvocationsRequest, InvocationsResult>();
 
         if(mediumBuilderAction is not null)
             mediumBuilderAction(mediumBuilder);
 
         var sp = services.BuildServiceProvider();
-        var medium = sp.GetRequiredService<IMedium<InvocationsPayload, InvocationsResult>>();
+        var medium = sp.GetRequiredService<IMedium<InvocationsRequest, InvocationsResult>>();
 
         return medium;
     }
@@ -190,8 +190,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation2AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(Invocation2AsyncMiddleware), i),
@@ -207,8 +207,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation1AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(Invocation1AsyncMiddleware), i),
@@ -225,8 +225,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation2AsyncMiddleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(InvocationTerminateAsyncMiddleware), i),
@@ -242,8 +242,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation2Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = medium.Execute(payload);
+        var request = new InvocationsRequest();
+        var res = medium.Execute(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(Invocation2Middleware), i),
@@ -259,8 +259,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation1Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = medium.Execute(payload);
+        var request = new InvocationsRequest();
+        var res = medium.Execute(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(Invocation1Middleware), i),
@@ -277,8 +277,8 @@ public class MiddlewareResultPipelineTests
             .Use<Invocation2Middleware>()
         );
 
-        var payload = new InvocationsPayload();
-        var res = medium.Execute(payload);
+        var request = new InvocationsRequest();
+        var res = medium.Execute(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(InvocationTerminateMiddleware), i),
@@ -295,8 +295,8 @@ public class MiddlewareResultPipelineTests
             .UseWhen<InvocationTerminateAsyncMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1AsyncMiddleware)))
         );
 
-        var payload = new InvocationsPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new InvocationsRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(InvocationTerminateAsyncMiddleware), i),
@@ -313,8 +313,8 @@ public class MiddlewareResultPipelineTests
             .UseWhen<InvocationTerminateMiddleware>(p => p.InvocationList.Contains(nameof(Invocation1Middleware)))
         );
 
-        var payload = new InvocationsPayload();
-        var res = medium.Execute(payload);
+        var request = new InvocationsRequest();
+        var res = medium.Execute(request);
 
         Assert.Collection(res.InvocationList, 
             i => Assert.Equal(nameof(InvocationTerminateMiddleware), i),

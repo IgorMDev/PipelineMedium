@@ -1,6 +1,6 @@
-﻿namespace Medium.Tests.Payloads;
+﻿namespace Medium.Tests.Requests;
 
-internal class InvocationsPayload
+internal class InvocationsRequest
 {
     internal List<string> InvocationList { get; set; } = [];
 }

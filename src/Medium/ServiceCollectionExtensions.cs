@@ -23,40 +23,40 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload type to the <see cref="IServiceCollection"/>.
+    /// Adds Medium services for a specific request type to the <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
     /// <returns>The updated service collection.</returns>
-    internal static IServiceCollection AddMediumServices<TPayload>(this IServiceCollection services)
+    internal static IServiceCollection AddMediumServices<TRequest>(this IServiceCollection services)
     {
-        services.TryAddSingleton<IComponentBinderFactory<TPayload>, ComponentBinderFactory<TPayload>>();
-        services.TryAddSingleton<IMedium<TPayload>, Medium<TPayload>>();
+        services.TryAddSingleton<IComponentBinderFactory<TRequest>, ComponentBinderFactory<TRequest>>();
+        services.TryAddSingleton<IMedium<TRequest>, Medium<TRequest>>();
         return services;
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload and result type to the <see cref="IServiceCollection"/>.
+    /// Adds Medium services for a specific request and result type to the <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
     /// <returns>The updated service collection.</returns>
-    internal static IServiceCollection AddMediumServices<TPayload, TResult>(this IServiceCollection services)
+    internal static IServiceCollection AddMediumServices<TRequest, TResult>(this IServiceCollection services)
     {
-        services.TryAddSingleton<IComponentBinderFactory<TPayload, TResult>, ComponentBinderFactory<TPayload, TResult>>();
-        services.TryAddSingleton<IMedium<TPayload, TResult>, Medium<TPayload, TResult>>();
+        services.TryAddSingleton<IComponentBinderFactory<TRequest, TResult>, ComponentBinderFactory<TRequest, TResult>>();
+        services.TryAddSingleton<IMedium<TRequest, TResult>, Medium<TRequest, TResult>>();
         return services;
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TPayload}"/>.
+    /// Adds Medium services for a specific request type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TRequest}"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
     /// <param name="name">The name of the Medium.</param>
-    /// <returns>A <see cref="MediumBuilder{TPayload}"/> for configuring the Medium.</returns>
-    public static MediumBuilder<TPayload> AddMedium<TPayload>(this IServiceCollection services, string name)
+    /// <returns>A <see cref="MediumBuilder{TRequest}"/> for configuring the Medium.</returns>
+    public static MediumBuilder<TRequest> AddMedium<TRequest>(this IServiceCollection services, string name)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(name);
@@ -66,33 +66,33 @@ public static class ServiceCollectionExtensions
         }
 #endif  
 
-        services.AddMediumServices<TPayload>();
+        services.AddMediumServices<TRequest>();
 
-        return new MediumBuilder<TPayload>(services, name);
+        return new MediumBuilder<TRequest>(services, name);
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TPayload}"/>.
+    /// Adds Medium services for a specific request type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TRequest}"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
-    /// <returns>A <see cref="MediumBuilder{TPayload}"/> for configuring the Medium.</returns>
-    public static MediumBuilder<TPayload> AddMedium<TPayload>(this IServiceCollection services)
+    /// <returns>A <see cref="MediumBuilder{TRequest}"/> for configuring the Medium.</returns>
+    public static MediumBuilder<TRequest> AddMedium<TRequest>(this IServiceCollection services)
     {
-        services.AddMediumServices<TPayload>();
+        services.AddMediumServices<TRequest>();
 
-        return new MediumBuilder<TPayload>(services);
+        return new MediumBuilder<TRequest>(services);
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload and result type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TPayload, TResult}"/>.
+    /// Adds Medium services for a specific request and result type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TRequest, TResult}"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
     /// <param name="name">The name of the Medium.</param>
-    /// <returns>A <see cref="MediumBuilder{TPayload, TResult}"/> for configuring the Medium.</returns>
-    public static MediumBuilder<TPayload, TResult> AddMedium<TPayload, TResult>(this IServiceCollection services, string name)
+    /// <returns>A <see cref="MediumBuilder{TRequest, TResult}"/> for configuring the Medium.</returns>
+    public static MediumBuilder<TRequest, TResult> AddMedium<TRequest, TResult>(this IServiceCollection services, string name)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(name);
@@ -102,22 +102,22 @@ public static class ServiceCollectionExtensions
         }
 #endif  
 
-        services.AddMediumServices<TPayload, TResult>();
+        services.AddMediumServices<TRequest, TResult>();
 
-        return new MediumBuilder<TPayload, TResult>(services, name);
+        return new MediumBuilder<TRequest, TResult>(services, name);
     }
 
     /// <summary>
-    /// Adds Medium services for a specific payload and result type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TPayload, TResult}"/>.
+    /// Adds Medium services for a specific request and result type to the <see cref="IServiceCollection"/> and returns a <see cref="MediumBuilder{TRequest, TResult}"/>.
     /// </summary>
-    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <typeparam name="TRequest">The type of the request.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
     /// <param name="services">The service collection to add the services to.</param>
-    /// <returns>A <see cref="MediumBuilder{TPayload, TResult}"/> for configuring the Medium.</returns>
-    public static MediumBuilder<TPayload, TResult> AddMedium<TPayload, TResult>(this IServiceCollection services)
+    /// <returns>A <see cref="MediumBuilder{TRequest, TResult}"/> for configuring the Medium.</returns>
+    public static MediumBuilder<TRequest, TResult> AddMedium<TRequest, TResult>(this IServiceCollection services)
     {
-        services.AddMediumServices<TPayload, TResult>();
+        services.AddMediumServices<TRequest, TResult>();
 
-        return new MediumBuilder<TPayload, TResult>(services);
+        return new MediumBuilder<TRequest, TResult>(services);
     }
 }

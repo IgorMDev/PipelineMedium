@@ -1,18 +1,18 @@
-﻿using Medium.Tests.Payloads;
+﻿using Medium.Tests.Requests;
 
 namespace Medium.Tests.Services;
 
 internal class CheckupService
 {
-    public Task CheckupAsync(CheckupPayload payload)
+    public Task CheckupAsync(CheckupRequest request)
     {
-        payload.IsInvokedAsync = true;
+        request.IsInvokedAsync = true;
         return Task.CompletedTask;
     }
 
-    public void Checkup(CheckupPayload payload)
+    public void Checkup(CheckupRequest request)
     {
-        payload.IsInvoked = true;
+        request.IsInvoked = true;
     }
 
     public Task<CheckupResult> CheckupResultAsync()

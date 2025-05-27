@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace Medium;
 
-public class MediumValidateOptions<TPayload>(string? name) : IValidateOptions<MediumOptions<TPayload>>
+public class MediumValidateOptions<TRequest>(string? name) : IValidateOptions<MediumOptions<TRequest>>
 {
     public string? Name { get; set; } = name;
 
-    public ValidateOptionsResult Validate(string? name, MediumOptions<TPayload> options)
+    public ValidateOptionsResult Validate(string? name, MediumOptions<TRequest> options)
     {
         if(name is null || name == Name) {
             if(options.Components.Any(c => !c.IsValid) || !options.TerminateComponent.IsValid)
@@ -21,11 +21,11 @@ public class MediumValidateOptions<TPayload>(string? name) : IValidateOptions<Me
     }
 }
 
-public class MediumValidateOptions<TPayload, TResult>(string? name) : IValidateOptions<MediumOptions<TPayload, TResult>>
+public class MediumValidateOptions<TRequest, TResult>(string? name) : IValidateOptions<MediumOptions<TRequest, TResult>>
 {
     public string? Name { get; set; } = name;
 
-    public ValidateOptionsResult Validate(string? name, MediumOptions<TPayload, TResult> options)
+    public ValidateOptionsResult Validate(string? name, MediumOptions<TRequest, TResult> options)
     {
         if(name is null || name == Name) {
             if(options.Components.Any(c => !c.IsValid) || !options.TerminateComponent.IsValid)

@@ -1,6 +1,6 @@
-﻿namespace Medium.Tests.Payloads;
+﻿namespace Medium.Tests.Requests;
 
-internal class CheckupPayload
+internal class CheckupRequest
 {
     internal bool IsInvokedAsync { get; set; }
     internal bool IsInvoked { get; set; }

@@ -1,5 +1,5 @@
 ﻿using Medium.Tests.Middlewares;
-using Medium.Tests.Payloads;
+using Medium.Tests.Requests;
 using Medium.Tests.Services;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -10,18 +10,18 @@ namespace Medium.Tests;
 
 public partial class MiddlewareCheckupTests
 {
-    private static IMedium<CheckupPayload> CreateMedium(Action<MediumBuilder<CheckupPayload>>? mediumBuilderAction)
+    private static IMedium<CheckupRequest> CreateMedium(Action<MediumBuilder<CheckupRequest>>? mediumBuilderAction)
     {
         IServiceCollection services = new ServiceCollection();
         services.AddOptions();
         services.AddTransient<CheckupService>();
-        var mediumBuilder = services.AddMedium<CheckupPayload>();
+        var mediumBuilder = services.AddMedium<CheckupRequest>();
 
         if(mediumBuilderAction is not null)
             mediumBuilderAction(mediumBuilder);
 
         var sp = services.BuildServiceProvider();
-        var medium = sp.GetRequiredService<IMedium<CheckupPayload>>();
+        var medium = sp.GetRequiredService<IMedium<CheckupRequest>>();
 
         return medium;
     }
@@ -31,11 +31,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -43,11 +43,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupMiddleware>());
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -55,9 +55,9 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupExceptionAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -65,9 +65,9 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupExceptionMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -75,11 +75,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupAsyncMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -87,11 +87,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -99,11 +99,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -111,11 +111,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupMiddleware>());
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -123,9 +123,9 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupExceptionAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -133,9 +133,9 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupExceptionMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -143,11 +143,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupAsyncMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -155,11 +155,11 @@ public partial class MiddlewareCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -170,11 +170,11 @@ public partial class MiddlewareCheckupTests
             return next();
         }));
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -185,11 +185,11 @@ public partial class MiddlewareCheckupTests
             next();
         }));
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -199,9 +199,9 @@ public partial class MiddlewareCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -211,9 +211,9 @@ public partial class MiddlewareCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -224,11 +224,11 @@ public partial class MiddlewareCheckupTests
             return next();
         }));
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -239,11 +239,11 @@ public partial class MiddlewareCheckupTests
             next();
         }));
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -253,9 +253,9 @@ public partial class MiddlewareCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -265,9 +265,9 @@ public partial class MiddlewareCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -279,11 +279,11 @@ public partial class MiddlewareCheckupTests
             await next();
         }));
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -295,11 +295,11 @@ public partial class MiddlewareCheckupTests
             next();
         }));
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -310,11 +310,11 @@ public partial class MiddlewareCheckupTests
             await next();
         }));
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -325,11 +325,11 @@ public partial class MiddlewareCheckupTests
             next();
         }));
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -340,11 +340,11 @@ public partial class MiddlewareCheckupTests
             return Task.CompletedTask;
         }));
 
-        var payload = new CheckupPayload();
-        await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
 
-        Assert.True(payload.IsInvokedAsync);
-        Assert.False(payload.IsInvoked);
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
     }
 
     [Fact]
@@ -354,28 +354,28 @@ public partial class MiddlewareCheckupTests
             p.IsInvoked = true;
         }));
 
-        var payload = new CheckupPayload();
-        medium.Execute(payload);
+        var request = new CheckupRequest();
+        medium.Execute(request);
 
-        Assert.True(payload.IsInvoked);
-        Assert.False(payload.IsInvokedAsync);
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 }
 
 public class MiddlewareWithResultCheckupTests
 {
-    private static IMedium<CheckupPayload, CheckupResult> CreateMedium(Action<MediumBuilder<CheckupPayload, CheckupResult>>? mediumBuilderAction)
+    private static IMedium<CheckupRequest, CheckupResult> CreateMedium(Action<MediumBuilder<CheckupRequest, CheckupResult>>? mediumBuilderAction)
     {
         IServiceCollection services = new ServiceCollection();
         services.AddOptions();
         services.AddTransient<CheckupService>();
-        var mediumBuilder = services.AddMedium<CheckupPayload, CheckupResult>();
+        var mediumBuilder = services.AddMedium<CheckupRequest, CheckupResult>();
 
         if(mediumBuilderAction is not null)
             mediumBuilderAction(mediumBuilder);
 
         var sp = services.BuildServiceProvider();
-        var medium = sp.GetRequiredService<IMedium<CheckupPayload, CheckupResult>>();
+        var medium = sp.GetRequiredService<IMedium<CheckupRequest, CheckupResult>>();
 
         return medium;
     }
@@ -385,8 +385,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -397,8 +397,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultMiddleware>());
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -409,9 +409,9 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultExceptionAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -419,9 +419,9 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultExceptionMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -429,8 +429,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultAsyncMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -441,8 +441,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -453,8 +453,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -465,8 +465,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultMiddleware>());
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -477,9 +477,9 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultExceptionAsyncMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -487,9 +487,9 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultExceptionMiddleware>());
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -497,8 +497,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultAsyncMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -509,8 +509,8 @@ public class MiddlewareWithResultCheckupTests
     {
         var medium = CreateMedium(b => b.Use<CheckupResultMiddlewareSP>());
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -525,8 +525,8 @@ public class MiddlewareWithResultCheckupTests
             });
         }));
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -541,8 +541,8 @@ public class MiddlewareWithResultCheckupTests
             };
         }));
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -551,13 +551,13 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
+        var medium = CreateMedium(b => b.Use((CheckupRequest p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -567,9 +567,9 @@ public class MiddlewareWithResultCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(payload));
+        await Assert.ThrowsAsync<CheckupException>(async () => await medium.ExecuteAsync(request));
     }
 
     [Fact]
@@ -581,8 +581,8 @@ public class MiddlewareWithResultCheckupTests
             });
         }));
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -597,8 +597,8 @@ public class MiddlewareWithResultCheckupTests
             };
         }));
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -607,13 +607,13 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public void Execute_InvokeAsyncMiddlewareFunc_ThrowsException()
     {
-        var medium = CreateMedium(b => b.Use((CheckupPayload p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
+        var medium = CreateMedium(b => b.Use((CheckupRequest p, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken _) => {
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -623,9 +623,9 @@ public class MiddlewareWithResultCheckupTests
             throw new CheckupException();
         }));
 
-        var payload = new CheckupPayload();
+        var request = new CheckupRequest();
 
-        Assert.Throws<CheckupException>(() => medium.Execute(payload));
+        Assert.Throws<CheckupException>(() => medium.Execute(request));
     }
 
     [Fact]
@@ -636,8 +636,8 @@ public class MiddlewareWithResultCheckupTests
             return await chService.CheckupResultAsync();
         }));
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -651,8 +651,8 @@ public class MiddlewareWithResultCheckupTests
             return chService.CheckupResult();
         }));
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -665,8 +665,8 @@ public class MiddlewareWithResultCheckupTests
             return await chService.CheckupResultAsync();
         }));
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -679,8 +679,8 @@ public class MiddlewareWithResultCheckupTests
             return chService.CheckupResult();
         }));
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);
@@ -693,8 +693,8 @@ public class MiddlewareWithResultCheckupTests
             return Task.FromResult(new CheckupResult { IsInvokedAsync = true });
         }));
 
-        var payload = new CheckupPayload();
-        var res = await medium.ExecuteAsync(payload);
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
@@ -707,8 +707,8 @@ public class MiddlewareWithResultCheckupTests
             return new CheckupResult { IsInvoked = true };
         }));
 
-        var payload = new CheckupPayload();
-        var res = medium.Execute(payload);
+        var request = new CheckupRequest();
+        var res = medium.Execute(request);
 
         Assert.True(res.IsInvoked);
         Assert.False(res.IsInvokedAsync);

@@ -2,9 +2,9 @@
 
 namespace Medium;
 
-public class MediumConfigureOptions<TPayload> : ConfigureNamedOptions<MediumOptions<TPayload>>
+public class MediumConfigureOptions<TRequest> : ConfigureNamedOptions<MediumOptions<TRequest>>
 {
-    public MediumConfigureOptions(string? name, MediumOptions<TPayload> options) : base(name, o => {
+    public MediumConfigureOptions(string? name, MediumOptions<TRequest> options) : base(name, o => {
         o.Components = options.Components;
         o.TerminateComponent = options.TerminateComponent;
     })
@@ -19,9 +19,9 @@ public class MediumConfigureOptions<TPayload> : ConfigureNamedOptions<MediumOpti
     }
 }
 
-public class MediumConfigureOptions<TPayload, TResult> : ConfigureNamedOptions<MediumOptions<TPayload, TResult>>
+public class MediumConfigureOptions<TRequest, TResult> : ConfigureNamedOptions<MediumOptions<TRequest, TResult>>
 {
-    public MediumConfigureOptions(string? name, MediumOptions<TPayload, TResult> options) : base(name, o => {
+    public MediumConfigureOptions(string? name, MediumOptions<TRequest, TResult> options) : base(name, o => {
         o.Components = options.Components;
         o.TerminateComponent = options.TerminateComponent;
     })

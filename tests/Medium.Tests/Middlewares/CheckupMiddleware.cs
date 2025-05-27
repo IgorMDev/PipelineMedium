@@ -1,45 +1,45 @@
-﻿using Medium.Tests.Payloads;
+﻿using Medium.Tests.Requests;
 using Medium.Tests.Services;
 
 namespace Medium.Tests.Middlewares;
 
-internal class CheckupAsyncMiddleware : IAsyncMiddleware<CheckupPayload>
+internal class CheckupAsyncMiddleware : IAsyncMiddleware<CheckupRequest>
 {
-    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public Task InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
-        payload.IsInvokedAsync = true;
+        request.IsInvokedAsync = true;
         return next();
     }
 }
 
-internal class CheckupMiddleware : IMiddleware<CheckupPayload>
+internal class CheckupMiddleware : IMiddleware<CheckupRequest>
 {
-    public void Invoke(CheckupPayload payload, NextMiddlewareDelegate next)
+    public void Invoke(CheckupRequest request, NextMiddlewareDelegate next)
     {
-        payload.IsInvoked = true;
+        request.IsInvoked = true;
         next();
     }
 }
 
-internal class CheckupExceptionAsyncMiddleware : IAsyncMiddleware<CheckupPayload>
+internal class CheckupExceptionAsyncMiddleware : IAsyncMiddleware<CheckupRequest>
 {
-    public Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public Task InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         throw new CheckupException();
     }
 }
 
-internal class CheckupExceptionMiddleware : IMiddleware<CheckupPayload>
+internal class CheckupExceptionMiddleware : IMiddleware<CheckupRequest>
 {
-    public void Invoke(CheckupPayload payload, NextMiddlewareDelegate next)
+    public void Invoke(CheckupRequest request, NextMiddlewareDelegate next)
     {
         throw new CheckupException();
     }
 }
 
-internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupRequest, CheckupResult>
 {
-    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
+    public Task<CheckupResult> InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         return Task.FromResult(new CheckupResult {
             IsInvokedAsync = true
@@ -47,9 +47,9 @@ internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupPayload, C
     }
 }
 
-internal class CheckupResultMiddleware : IMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultMiddleware : IMiddleware<CheckupRequest, CheckupResult>
 {
-    public CheckupResult Invoke(CheckupPayload payload, NextMiddlewareDelegate<CheckupResult> next)
+    public CheckupResult Invoke(CheckupRequest request, NextMiddlewareDelegate<CheckupResult> next)
     {
         return new CheckupResult {
             IsInvoked = true
@@ -57,51 +57,51 @@ internal class CheckupResultMiddleware : IMiddleware<CheckupPayload, CheckupResu
     }
 }
 
-internal class CheckupResultExceptionAsyncMiddleware : IAsyncMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultExceptionAsyncMiddleware : IAsyncMiddleware<CheckupRequest, CheckupResult>
 {
-    public Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
+    public Task<CheckupResult> InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         throw new CheckupException();
     }
 }
 
-internal class CheckupResultExceptionMiddleware : IMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultExceptionMiddleware : IMiddleware<CheckupRequest, CheckupResult>
 {
-    public CheckupResult Invoke(CheckupPayload payload, NextMiddlewareDelegate<CheckupResult> next)
+    public CheckupResult Invoke(CheckupRequest request, NextMiddlewareDelegate<CheckupResult> next)
     {
         throw new CheckupException();
     }
 }
 
-internal class CheckupAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupPayload>
+internal class CheckupAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupRequest>
 {
-    public async Task InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    public async Task InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
-        await checkupService.CheckupAsync(payload);
+        await checkupService.CheckupAsync(request);
         await next();
     }
 }
 
-internal class CheckupMiddlewareSP(CheckupService checkupService) : IMiddleware<CheckupPayload>
+internal class CheckupMiddlewareSP(CheckupService checkupService) : IMiddleware<CheckupRequest>
 {
-    public void Invoke(CheckupPayload payload, NextMiddlewareDelegate next)
+    public void Invoke(CheckupRequest request, NextMiddlewareDelegate next)
     {
-        checkupService.Checkup(payload);
+        checkupService.Checkup(request);
         next();
     }
 }
 
-internal class CheckupResultAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultAsyncMiddlewareSP(CheckupService checkupService) : IAsyncMiddleware<CheckupRequest, CheckupResult>
 {
-    public async Task<CheckupResult> InvokeAsync(CheckupPayload payload, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
+    public async Task<CheckupResult> InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
     {
         return await checkupService.CheckupResultAsync();
     }
 }
 
-internal class CheckupResultMiddlewareSP(CheckupService checkupService) : IMiddleware<CheckupPayload, CheckupResult>
+internal class CheckupResultMiddlewareSP(CheckupService checkupService) : IMiddleware<CheckupRequest, CheckupResult>
 {
-    public CheckupResult Invoke(CheckupPayload payload, NextMiddlewareDelegate<CheckupResult> next)
+    public CheckupResult Invoke(CheckupRequest request, NextMiddlewareDelegate<CheckupResult> next)
     {
         return checkupService.CheckupResult();
     }

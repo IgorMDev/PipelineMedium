@@ -7,15 +7,15 @@ namespace Medium;
 /// <summary>
 /// Binds components to middleware delegates for processing payloads.
 /// </summary>
-/// <typeparam name="TPayload">The type of the payload.</typeparam>
-public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
+/// <typeparam name="TRequest">The type of the request.</typeparam>
+public class ComponentBinder<TRequest> : IComponentBinder<TRequest>
 {
-    private ContextualAsyncMiddlewareDelegate<TPayload>? AsyncMiddlewareDelegate;
-    private ContextualMiddlewareDelegate<TPayload>? MiddlewareDelegate;
+    private ContextualAsyncMiddlewareDelegate<TRequest>? AsyncMiddlewareDelegate;
+    private ContextualMiddlewareDelegate<TRequest>? MiddlewareDelegate;
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
-    public ContextualAsyncMiddlewareDelegate<TPayload> GetAsyncMiddlewareDelegate()
+    public ContextualAsyncMiddlewareDelegate<TRequest> GetAsyncMiddlewareDelegate()
     {
         if(AsyncMiddlewareDelegate is not null)
             return AsyncMiddlewareDelegate;
@@ -30,7 +30,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
-    public ContextualMiddlewareDelegate<TPayload> GetMiddlewareDelegate()
+    public ContextualMiddlewareDelegate<TRequest> GetMiddlewareDelegate()
     {
         if(MiddlewareDelegate is not null)
             return MiddlewareDelegate;
@@ -41,19 +41,19 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     }
     
     /// <inheritdoc/>
-    public IComponentBinder<TPayload> Init(TerminateComponentDescriptor<TPayload> descriptor)
+    public IComponentBinder<TRequest> Init(TerminateComponentDescriptor<TRequest> descriptor)
     {
         if(descriptor.AsyncAction != null) {
-            AsyncMiddlewareDelegate = context => descriptor.AsyncAction(context.Payload);
+            AsyncMiddlewareDelegate = context => descriptor.AsyncAction(context.Request);
             if(descriptor.Action is null)
-                MiddlewareDelegate = context => descriptor.AsyncAction(context.Payload).GetAwaiter().GetResult();
+                MiddlewareDelegate = context => descriptor.AsyncAction(context.Request).GetAwaiter().GetResult();
         }
 
         if(descriptor.Action != null) {
-            MiddlewareDelegate = context => descriptor.Action(context.Payload);
+            MiddlewareDelegate = context => descriptor.Action(context.Request);
             if(descriptor.AsyncAction is null)
                 AsyncMiddlewareDelegate = context => {
-                    descriptor.Action(context.Payload);
+                    descriptor.Action(context.Request);
                     return Task.CompletedTask;
                 };
         }
@@ -63,7 +63,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
 
 #if NETSTANDARD2_0
     /// <inheritdoc/>
-    public IComponentBinder<TPayload> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload>> descriptors)
+    public IComponentBinder<TRequest> BindComponents(IReadOnlyCollection<ComponentDescriptor<TRequest>> descriptors)
     {
         foreach (var descriptor in descriptors)
             BindToComponent(descriptor);
@@ -73,7 +73,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
 #endif
 
     /// <inheritdoc/>
-    public IComponentBinder<TPayload> BindToComponent(ComponentDescriptor<TPayload> descriptor)
+    public IComponentBinder<TRequest> BindToComponent(ComponentDescriptor<TRequest> descriptor)
     {
         var asyncMiddlewareDelegate = BindToAsyncDelegate(descriptor);
         var middlewareDelegate = BindToDelegate(descriptor);
@@ -93,7 +93,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
             }
 
             AsyncMiddlewareDelegate = asyncMiddlewareDelegate is null ? null : context => {
-                if(descriptor.Condition(context.Payload))
+                if(descriptor.Condition(context.Request))
                     return asyncMiddlewareDelegate(context);
                 if(nextAsyncDelegate is not null)
                     return nextAsyncDelegate(context);
@@ -102,7 +102,7 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
             };
 
             MiddlewareDelegate = middlewareDelegate is null ? null : context => {
-                if(descriptor.Condition(context.Payload)) {
+                if(descriptor.Condition(context.Request)) {
                     middlewareDelegate(context);
                     return;
                 }
@@ -127,13 +127,13 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// </summary>
     /// <param name="descriptor">The component descriptor.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private ContextualAsyncMiddlewareDelegate<TPayload>? BindToAsyncDelegate(ComponentDescriptor<TPayload> descriptor)
+    private ContextualAsyncMiddlewareDelegate<TRequest>? BindToAsyncDelegate(ComponentDescriptor<TRequest> descriptor)
     {
-        AsyncMiddlewareSPFunc<TPayload>? asyncMiddlewareAction = default;
-        if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TPayload>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            asyncMiddlewareAction = (sp, next) => (p, ct) => {
-                var middleware = (IAsyncMiddleware<TPayload>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                return middleware.InvokeAsync(p, next, ct);
+        AsyncMiddlewareSPFunc<TRequest>? asyncMiddlewareAction = default;
+        if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TRequest>).IsAssignableFrom(descriptor.MiddlewareType)) {
+            asyncMiddlewareAction = (sp, next) => (r, ct) => {
+                var middleware = (IAsyncMiddleware<TRequest>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
+                return middleware.InvokeAsync(r, next, ct);
             };
         }
         else {
@@ -153,13 +153,13 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// </summary>
     /// <param name="descriptor">The component descriptor.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private ContextualMiddlewareDelegate<TPayload>? BindToDelegate(ComponentDescriptor<TPayload> descriptor)
+    private ContextualMiddlewareDelegate<TRequest>? BindToDelegate(ComponentDescriptor<TRequest> descriptor)
     {
-        MiddlewareSPFunc<TPayload>? middlewareAction = default;
-        if(descriptor.MiddlewareType is not null && typeof(IMiddleware<TPayload>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            middlewareAction = (sp, next) => p => {
-                var middleware = (IMiddleware<TPayload>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                middleware.Invoke(p, next);
+        MiddlewareSPFunc<TRequest>? middlewareAction = default;
+        if(descriptor.MiddlewareType is not null && typeof(IMiddleware<TRequest>).IsAssignableFrom(descriptor.MiddlewareType)) {
+            middlewareAction = (sp, next) => r => {
+                var middleware = (IMiddleware<TRequest>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
+                middleware.Invoke(r, next);
             };
         }
         else {
@@ -181,9 +181,9 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <param name="next">The next asynchronous middleware delegate.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private static ContextualAsyncMiddlewareDelegate<TPayload> BindAsync(AsyncMiddlewareSPFunc<TPayload> middleware, ContextualAsyncMiddlewareDelegate<TPayload> next)
+    private static ContextualAsyncMiddlewareDelegate<TRequest> BindAsync(AsyncMiddlewareSPFunc<TRequest> middleware, ContextualAsyncMiddlewareDelegate<TRequest> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload, context.CancellationToken);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Request, context.CancellationToken);
     }
 
     /// <summary>
@@ -192,12 +192,12 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <param name="next">The next middleware delegate.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private static ContextualAsyncMiddlewareDelegate<TPayload> BindAsync(AsyncMiddlewareSPFunc<TPayload> middleware, ContextualMiddlewareDelegate<TPayload> next)
+    private static ContextualAsyncMiddlewareDelegate<TRequest> BindAsync(AsyncMiddlewareSPFunc<TRequest> middleware, ContextualMiddlewareDelegate<TRequest> next)
     {
         return context => middleware(context.ServiceProvider, () => {
             next(context);
             return Task.CompletedTask;
-        })(context.Payload, context.CancellationToken);
+        })(context.Request, context.CancellationToken);
     }
 
     /// <summary>
@@ -206,9 +206,9 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// <param name="middleware">The middleware function.</param>
     /// <param name="next">The next middleware delegate.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private static ContextualMiddlewareDelegate<TPayload> Bind(MiddlewareSPFunc<TPayload> middleware, ContextualMiddlewareDelegate<TPayload> next)
+    private static ContextualMiddlewareDelegate<TRequest> Bind(MiddlewareSPFunc<TRequest> middleware, ContextualMiddlewareDelegate<TRequest> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Request);
     }
 
     /// <summary>
@@ -217,9 +217,9 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
     /// <param name="middleware">The middleware function.</param>
     /// <param name="next">The next asynchronous middleware delegate.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private static ContextualMiddlewareDelegate<TPayload> Bind(MiddlewareSPFunc<TPayload> middleware, ContextualAsyncMiddlewareDelegate<TPayload> next)
+    private static ContextualMiddlewareDelegate<TRequest> Bind(MiddlewareSPFunc<TRequest> middleware, ContextualAsyncMiddlewareDelegate<TRequest> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context).GetAwaiter().GetResult())(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context).GetAwaiter().GetResult())(context.Request);
     }
     #endregion
 }
@@ -227,16 +227,16 @@ public class ComponentBinder<TPayload> : IComponentBinder<TPayload>
 /// <summary>
 /// Binds components to middleware delegates for processing payloads and returning results.
 /// </summary>
-/// <typeparam name="TPayload">The type of the payload.</typeparam>
+/// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TResult>
+public class ComponentBinder<TRequest, TResult> : IComponentBinder<TRequest, TResult>
 {
-    protected ContextualAsyncMiddlewareDelegate<TPayload, TResult>? AsyncMiddlewareDelegate;
-    protected ContextualMiddlewareDelegate<TPayload, TResult>? MiddlewareDelegate;
+    protected ContextualAsyncMiddlewareDelegate<TRequest, TResult>? AsyncMiddlewareDelegate;
+    protected ContextualMiddlewareDelegate<TRequest, TResult>? MiddlewareDelegate;
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
-    public ContextualAsyncMiddlewareDelegate<TPayload, TResult> GetAsyncMiddlewareDelegate()
+    public ContextualAsyncMiddlewareDelegate<TRequest, TResult> GetAsyncMiddlewareDelegate()
     {
         if(AsyncMiddlewareDelegate is not null)
             return AsyncMiddlewareDelegate;
@@ -248,7 +248,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when no middleware is defined.</exception>
-    public ContextualMiddlewareDelegate<TPayload, TResult> GetMiddlewareDelegate()
+    public ContextualMiddlewareDelegate<TRequest, TResult> GetMiddlewareDelegate()
     {
         if(MiddlewareDelegate is not null)
             return MiddlewareDelegate;
@@ -259,19 +259,19 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     }
 
     /// <inheritdoc/>
-    public IComponentBinder<TPayload, TResult> Init(TerminateComponentDescriptor<TPayload, TResult> descriptor)
+    public IComponentBinder<TRequest, TResult> Init(TerminateComponentDescriptor<TRequest, TResult> descriptor)
     {
         if(descriptor.AsyncFunc is not null) {
-            AsyncMiddlewareDelegate = context => descriptor.AsyncFunc(context.Payload);
+            AsyncMiddlewareDelegate = context => descriptor.AsyncFunc(context.Request);
             if(descriptor.Func is null)
-                MiddlewareDelegate = context => descriptor.AsyncFunc(context.Payload).GetAwaiter().GetResult();
+                MiddlewareDelegate = context => descriptor.AsyncFunc(context.Request).GetAwaiter().GetResult();
         }
 
         if(descriptor.Func is not null) {
-            MiddlewareDelegate = context => descriptor.Func(context.Payload);
+            MiddlewareDelegate = context => descriptor.Func(context.Request);
             if(descriptor.AsyncFunc is null)
                 AsyncMiddlewareDelegate = context => {
-                    return Task.FromResult(descriptor.Func(context.Payload));
+                    return Task.FromResult(descriptor.Func(context.Request));
                 };
         }
 
@@ -280,7 +280,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
 
 #if NETSTANDARD2_0
     /// <inheritdoc/>
-    public IComponentBinder<TPayload, TResult> BindComponents(IReadOnlyCollection<ComponentDescriptor<TPayload, TResult>> descriptors)
+    public IComponentBinder<TRequest, TResult> BindComponents(IReadOnlyCollection<ComponentDescriptor<TRequest, TResult>> descriptors)
     {
         foreach (var descriptor in descriptors)
             BindToComponent(descriptor);
@@ -290,7 +290,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
 #endif
 
     /// <inheritdoc/>
-    public IComponentBinder<TPayload, TResult> BindToComponent(ComponentDescriptor<TPayload, TResult> descriptor)
+    public IComponentBinder<TRequest, TResult> BindToComponent(ComponentDescriptor<TRequest, TResult> descriptor)
     {
         var asyncMiddlewareDelegate = BindToAsyncDelegate(descriptor);
         var middlewareDelegate = BindToDelegate(descriptor);
@@ -310,7 +310,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
             }
 
             AsyncMiddlewareDelegate = asyncMiddlewareDelegate is null ? null : context => {
-                if(descriptor.Condition(context.Payload))
+                if(descriptor.Condition(context.Request))
                     return asyncMiddlewareDelegate(context);
                 if(nextAsyncDelegate is not null)
                     return nextAsyncDelegate(context);
@@ -319,7 +319,7 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
             };
 
             MiddlewareDelegate = middlewareDelegate is null ? null : context => {
-                if(descriptor.Condition(context.Payload))
+                if(descriptor.Condition(context.Request))
                     return middlewareDelegate(context);
                 if(nextDelegate is not null)
                     return nextDelegate(context);
@@ -340,13 +340,13 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// </summary>
     /// <param name="descriptor">The component descriptor.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private ContextualAsyncMiddlewareDelegate<TPayload, TResult>? BindToAsyncDelegate(ComponentDescriptor<TPayload, TResult> descriptor)
+    private ContextualAsyncMiddlewareDelegate<TRequest, TResult>? BindToAsyncDelegate(ComponentDescriptor<TRequest, TResult> descriptor)
     {
-        AsyncMiddlewareSPFunc<TPayload, TResult>? asyncMiddlewareFunc = default;
-        if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TPayload, TResult>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            asyncMiddlewareFunc = (sp, next) => (p, ct) => {
-                var middleware = (IAsyncMiddleware<TPayload, TResult>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                return middleware.InvokeAsync(p, next, ct);
+        AsyncMiddlewareSPFunc<TRequest, TResult>? asyncMiddlewareFunc = default;
+        if(descriptor.MiddlewareType is not null && typeof(IAsyncMiddleware<TRequest, TResult>).IsAssignableFrom(descriptor.MiddlewareType)) {
+            asyncMiddlewareFunc = (sp, next) => (r, ct) => {
+                var middleware = (IAsyncMiddleware<TRequest, TResult>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
+                return middleware.InvokeAsync(r, next, ct);
             };
         }
         else {
@@ -366,13 +366,13 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// </summary>
     /// <param name="descriptor">The component descriptor.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private ContextualMiddlewareDelegate<TPayload, TResult>? BindToDelegate(ComponentDescriptor<TPayload, TResult> descriptor)
+    private ContextualMiddlewareDelegate<TRequest, TResult>? BindToDelegate(ComponentDescriptor<TRequest, TResult> descriptor)
     {
-        MiddlewareSPFunc<TPayload, TResult>? middlewareFunc = default;
-        if(descriptor.MiddlewareType is not null && typeof(IMiddleware<TPayload, TResult>).IsAssignableFrom(descriptor.MiddlewareType)) {
-            middlewareFunc = (sp, next) => p => {
-                var middleware = (IMiddleware<TPayload, TResult>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
-                return middleware.Invoke(p, next);
+        MiddlewareSPFunc<TRequest, TResult>? middlewareFunc = default;
+        if(descriptor.MiddlewareType is not null && typeof(IMiddleware<TRequest, TResult>).IsAssignableFrom(descriptor.MiddlewareType)) {
+            middlewareFunc = (sp, next) => r => {
+                var middleware = (IMiddleware<TRequest, TResult>)ActivatorUtilities.GetServiceOrCreateInstance(sp, descriptor.MiddlewareType);
+                return middleware.Invoke(r, next);
             };
         }
         else {
@@ -394,9 +394,9 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <param name="next">The next asynchronous middleware delegate.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private static ContextualAsyncMiddlewareDelegate<TPayload, TResult> BindAsync(AsyncMiddlewareSPFunc<TPayload, TResult> middleware, ContextualAsyncMiddlewareDelegate<TPayload, TResult> next)
+    private static ContextualAsyncMiddlewareDelegate<TRequest, TResult> BindAsync(AsyncMiddlewareSPFunc<TRequest, TResult> middleware, ContextualAsyncMiddlewareDelegate<TRequest, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload, context.CancellationToken);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Request, context.CancellationToken);
     }
 
     /// <summary>
@@ -405,9 +405,9 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <param name="next">The next middleware delegate.</param>
     /// <returns>The bound asynchronous middleware delegate.</returns>
-    private static ContextualAsyncMiddlewareDelegate<TPayload, TResult> BindAsync(AsyncMiddlewareSPFunc<TPayload, TResult> middleware, ContextualMiddlewareDelegate<TPayload, TResult> next)
+    private static ContextualAsyncMiddlewareDelegate<TRequest, TResult> BindAsync(AsyncMiddlewareSPFunc<TRequest, TResult> middleware, ContextualMiddlewareDelegate<TRequest, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => Task.FromResult(next(context)))(context.Payload, context.CancellationToken);
+        return context => middleware(context.ServiceProvider, () => Task.FromResult(next(context)))(context.Request, context.CancellationToken);
     }
 
     /// <summary>
@@ -416,9 +416,9 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <param name="middleware">The middleware function.</param>
     /// <param name="next">The next middleware delegate.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private static ContextualMiddlewareDelegate<TPayload, TResult> Bind(MiddlewareSPFunc<TPayload, TResult> middleware, ContextualMiddlewareDelegate<TPayload, TResult> next)
+    private static ContextualMiddlewareDelegate<TRequest, TResult> Bind(MiddlewareSPFunc<TRequest, TResult> middleware, ContextualMiddlewareDelegate<TRequest, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context))(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context))(context.Request);
     }
 
     /// <summary>
@@ -427,9 +427,9 @@ public class ComponentBinder<TPayload, TResult> : IComponentBinder<TPayload, TRe
     /// <param name="middleware">The middleware function.</param>
     /// <param name="next">The next asynchronous middleware delegate.</param>
     /// <returns>The bound middleware delegate.</returns>
-    private static ContextualMiddlewareDelegate<TPayload, TResult> Bind(MiddlewareSPFunc<TPayload, TResult> middleware, ContextualAsyncMiddlewareDelegate<TPayload, TResult> next)
+    private static ContextualMiddlewareDelegate<TRequest, TResult> Bind(MiddlewareSPFunc<TRequest, TResult> middleware, ContextualAsyncMiddlewareDelegate<TRequest, TResult> next)
     {
-        return context => middleware(context.ServiceProvider, () => next(context).GetAwaiter().GetResult())(context.Payload);
+        return context => middleware(context.ServiceProvider, () => next(context).GetAwaiter().GetResult())(context.Request);
     }
     #endregion
 }
