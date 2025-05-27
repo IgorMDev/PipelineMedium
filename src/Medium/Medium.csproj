@@ -22,10 +22,12 @@
     <None Include="..\..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
+      <Visible>false</Visible>
     </None>
     <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
+      <Visible>false</Visible>
     </None>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -44,6 +46,7 @@
     <Compile Include="..\Medium.Abstractions\*.cs">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
+      <Visible>false</Visible>
     </Compile>
   </ItemGroup>
   <ItemGroup>
