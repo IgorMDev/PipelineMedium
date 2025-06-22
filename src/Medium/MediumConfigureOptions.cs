@@ -5,8 +5,8 @@ namespace Medium;
 public class MediumConfigureOptions<TRequest> : ConfigureNamedOptions<MediumOptions<TRequest>>
 {
     public MediumConfigureOptions(string? name, MediumOptions<TRequest> options) : base(name, o => {
-        o.Components = options.Components;
-        o.TerminateComponent = options.TerminateComponent;
+        o.Middlewares = options.Middlewares;
+        o.TerminationMiddleware = options.TerminationMiddleware;
     })
     {
 #if NET7_0_OR_GREATER
@@ -22,8 +22,8 @@ public class MediumConfigureOptions<TRequest> : ConfigureNamedOptions<MediumOpti
 public class MediumConfigureOptions<TRequest, TResult> : ConfigureNamedOptions<MediumOptions<TRequest, TResult>>
 {
     public MediumConfigureOptions(string? name, MediumOptions<TRequest, TResult> options) : base(name, o => {
-        o.Components = options.Components;
-        o.TerminateComponent = options.TerminateComponent;
+        o.Middlewares = options.Middlewares;
+        o.TerminationMiddleware = options.TerminationMiddleware;
     })
     {
 #if NET7_0_OR_GREATER

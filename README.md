@@ -211,19 +211,19 @@ services.AddMedium<Request>()
     .Use(async (r, next, cancellationToken) => { });
 ```
 
-#### Default or terminate component of a pipeline. When execution of the pipeline goes next the way down, Medium executes a terminate component to end the process and return a result, you can define own behavior of that component.
+#### Default or termination component of a pipeline. When execution of the pipeline goes next the way down, Medium executes a termination component to end the process and return a result, you can define own behavior of that component.
 ```csharp
 services.AddMedium<Request>()
     .Use<SomeMiddleware>()
     .Use((r, next) => { next() })
-    .SetDefault(r => {
+    .UseTermination(r => {
         Console.WriteLine("Execution ended");
     });
 
 services.AddMedium<Request, Result>()
     .Use<SomeMiddleware>()
     .Use((r, next) => { next() })
-    .SetDefault(r => {
+    .UseTermination(r => {
         return new Result();
     });
 ```

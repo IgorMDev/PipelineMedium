@@ -23,8 +23,14 @@ public class MediumBuilder<TRequest>
     /// Initializes a new instance of the <see cref="MediumBuilder{TRequest}"/> class.
     /// </summary>
     /// <param name="services">The service collection to which the Medium services are added.</param>
+    public MediumBuilder(IServiceCollection services) : this(services, Medium.DefaultName) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MediumBuilder{TRequest}"/> class.
+    /// </summary>
+    /// <param name="services">The service collection to which the Medium services are added.</param>
     /// <param name="name">The name of the Medium.</param>
-    public MediumBuilder(IServiceCollection services, string name = Medium.DefaultName)
+    public MediumBuilder(IServiceCollection services, string name)
     {
         Services = services;
         Options = InitOptions();
@@ -49,42 +55,51 @@ public class MediumBuilder<TRequest>
     }
 
     /// <summary>
-    /// Sets the default terminate component descriptor for the Medium.
+    /// Sets the default termination middleware for the Medium.
     /// </summary>
-    /// <param name="descriptor">The terminate component descriptor.</param>
+    /// <param name="descriptor">The termination middleware descriptor.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
-    internal MediumBuilder<TRequest> SetDefault(TerminateComponentDescriptor<TRequest> descriptor)
+    internal MediumBuilder<TRequest> UseTermination(TerminationMiddlewareDescriptor<TRequest> descriptor)
     {
-        Options.TerminateComponent = descriptor;
+        Options.TerminationMiddleware = descriptor;
         return this;
     }
 
     /// <summary>
-    /// Adds a component descriptor to the Medium.
+    /// Adds a middleware descriptor to the Medium.
     /// </summary>
-    /// <param name="descriptor">The component descriptor.</param>
+    /// <param name="descriptor">The middleware descriptor.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
-    internal MediumBuilder<TRequest> Use(ComponentDescriptor<TRequest> descriptor)
+    internal MediumBuilder<TRequest> Use(MiddlewareDescriptor<TRequest> descriptor)
     {
-        Options.Components.Insert(0, descriptor);
+        Options.Middlewares.Insert(0, descriptor);
         return this;
     }
 
     /// <summary>
-    /// Sets the default asynchronous middleware for the Medium.
+    /// Creates a new instance of the Medium with the configured options.
+    /// </summary>
+    /// <returns>Medium instance</returns>
+    public Medium<TRequest> Build(IServiceProvider serviceProvider)
+    {
+        return new Medium<TRequest>(serviceProvider, Options);
+    }
+
+    /// <summary>
+    /// Sets termination asynchronous middleware for the Medium.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
-    public MediumBuilder<TRequest> SetDefault(AsyncMiddlewareDelegate<TRequest> middleware)
-        => SetDefault(new TerminateComponentDescriptor<TRequest>(middleware));
+    public MediumBuilder<TRequest> UseTermination(AsyncMiddlewareDelegate<TRequest> middleware)
+        => UseTermination(new TerminationMiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
-    /// Sets the default middleware for the Medium.
+    /// Sets termination middleware for the Medium.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
-    public MediumBuilder<TRequest> SetDefault(MiddlewareDelegate<TRequest> middleware)
-        => SetDefault(new TerminateComponentDescriptor<TRequest>(middleware));
+    public MediumBuilder<TRequest> UseTermination(MiddlewareDelegate<TRequest> middleware)
+        => UseTermination(new TerminationMiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds a middleware type to the Medium.
@@ -92,7 +107,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middlewareType">The middleware type.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(Type middlewareType)
-        => Use(new ComponentDescriptor<TRequest>(middlewareType));
+        => Use(new MiddlewareDescriptor<TRequest>(middlewareType));
 
     /// <summary>
     /// Adds a middleware type to the Medium with a condition.
@@ -101,7 +116,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middlewareType">The middleware type.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, Type middlewareType)
-        => Use(new ComponentDescriptor<TRequest>(middlewareType) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middlewareType) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware type to the Medium.
@@ -124,7 +139,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(AsyncMiddlewareFunc<TRequest> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware function to the Medium with a condition.
@@ -133,7 +148,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, AsyncMiddlewareFunc<TRequest> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium.
@@ -141,7 +156,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(Func<TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition.
@@ -150,7 +165,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, Func<TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses a service provider.
@@ -158,7 +173,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a service provider.
@@ -167,7 +182,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses a dependency.
@@ -177,7 +192,7 @@ public class MediumBuilder<TRequest>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use<TDep>(Func<TRequest, TDep, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep>(), next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a dependency.
@@ -188,7 +203,7 @@ public class MediumBuilder<TRequest>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen<TDep>(Predicate<TRequest> condition, Func<TRequest, TDep, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep>(), next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses two dependencies.
@@ -200,7 +215,7 @@ public class MediumBuilder<TRequest>
     public MediumBuilder<TRequest> Use<TDep1, TDep2>(Func<TRequest, TDep1, TDep2, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses two dependencies.
@@ -213,7 +228,7 @@ public class MediumBuilder<TRequest>
     public MediumBuilder<TRequest> UseWhen<TDep1, TDep2>(Predicate<TRequest> condition, Func<TRequest, TDep1, TDep2, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses three dependencies.
@@ -227,7 +242,7 @@ public class MediumBuilder<TRequest>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses three dependencies.
@@ -242,7 +257,7 @@ public class MediumBuilder<TRequest>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => (request, ct) => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware function to the Medium.
@@ -250,7 +265,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(MiddlewareFunc<TRequest> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds a middleware function to the Medium with a condition.
@@ -259,7 +274,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, MiddlewareFunc<TRequest> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium.
@@ -267,7 +282,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(Action<TRequest, NextMiddlewareDelegate> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition.
@@ -276,7 +291,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, Action<TRequest, NextMiddlewareDelegate> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium that uses a service provider.
@@ -284,7 +299,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use(Action<IServiceProvider, TRequest, NextMiddlewareDelegate> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest>(middleware));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition that uses a service provider.
@@ -293,7 +308,7 @@ public class MediumBuilder<TRequest>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen(Predicate<TRequest> condition, Action<IServiceProvider, TRequest, NextMiddlewareDelegate> middleware)
-        => Use(new ComponentDescriptor<TRequest>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium that uses a dependency.
@@ -303,7 +318,7 @@ public class MediumBuilder<TRequest>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> Use<TDep>(Action<TDep, TRequest, NextMiddlewareDelegate> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep>(), request, next)));
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep>(), request, next)));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition that uses a dependency.
@@ -314,7 +329,7 @@ public class MediumBuilder<TRequest>
     /// <returns>The current <see cref="MediumBuilder{TRequest}"/> instance.</returns>
     public MediumBuilder<TRequest> UseWhen<TDep>(Predicate<TRequest> condition, Action<TDep, TRequest, NextMiddlewareDelegate> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep>(), request, next)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep>(), request, next)) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium that uses two dependencies.
@@ -326,7 +341,7 @@ public class MediumBuilder<TRequest>
     public MediumBuilder<TRequest> Use<TDep1, TDep2>(Action<TDep1, TDep2, TRequest, NextMiddlewareDelegate> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next)));
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next)));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition that uses two dependencies.
@@ -338,7 +353,7 @@ public class MediumBuilder<TRequest>
     public MediumBuilder<TRequest> UseWhen<TDep1, TDep2>(Predicate<TRequest> condition, Action<TDep1, TDep2, TRequest, NextMiddlewareDelegate> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next)) { Condition = condition }
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next)) { Condition = condition }
         );
 
     /// <summary>
@@ -353,7 +368,7 @@ public class MediumBuilder<TRequest>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next))
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next))
         );
 
     /// <summary>
@@ -368,7 +383,7 @@ public class MediumBuilder<TRequest>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next)) { Condition = condition }
+        => Use(new MiddlewareDescriptor<TRequest>((sp, next) => request => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next)) { Condition = condition }
         );
 }
 
@@ -388,6 +403,12 @@ public class MediumBuilder<TRequest, TResult>
     /// Gets the options for configuring the Medium.
     /// </summary>
     protected readonly MediumOptions<TRequest, TResult> Options;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MediumBuilder{TRequest, TResult}"/> class.
+    /// </summary>
+    /// <param name="services">The service collection to which the Medium services are added.</param>
+    public MediumBuilder(IServiceCollection services) : this(services, Medium.DefaultName) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MediumBuilder{TRequest, TResult}"/> class.
@@ -419,13 +440,13 @@ public class MediumBuilder<TRequest, TResult>
     }
 
     /// <summary>
-    /// Sets the default terminate component descriptor for the Medium.
+    /// Sets the default termination middleware descriptor for the Medium.
     /// </summary>
-    /// <param name="descriptor">The terminate component descriptor.</param>
+    /// <param name="descriptor">The termination middleware descriptor.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
-    internal MediumBuilder<TRequest, TResult> SetDefault(TerminateComponentDescriptor<TRequest, TResult> descriptor)
+    internal MediumBuilder<TRequest, TResult> UseTermination(TerminationMiddlewareDescriptor<TRequest, TResult> descriptor)
     {
-        Options.TerminateComponent = descriptor;
+        Options.TerminationMiddleware = descriptor;
         return this;
     }
 
@@ -434,27 +455,36 @@ public class MediumBuilder<TRequest, TResult>
     /// </summary>
     /// <param name="descriptor">The component descriptor.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
-    internal MediumBuilder<TRequest, TResult> Use(ComponentDescriptor<TRequest, TResult> descriptor)
+    internal MediumBuilder<TRequest, TResult> Use(MiddlewareDescriptor<TRequest, TResult> descriptor)
     {
-        Options.Components.Insert(0, descriptor);
+        Options.Middlewares.Insert(0, descriptor);
         return this;
     }
 
     /// <summary>
-    /// Sets the default asynchronous middleware for the Medium.
+    /// Creates a new instance of the Medium with the configured options.
+    /// </summary>
+    /// <returns>Medium instance</returns>
+    public Medium<TRequest, TResult> Build(IServiceProvider serviceProvider)
+    {
+        return new Medium<TRequest, TResult>(serviceProvider, Options);
+    }
+
+    /// <summary>
+    /// Sets termination asynchronous middleware for the Medium.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
-    public MediumBuilder<TRequest, TResult> SetDefault(AsyncMiddlewareDelegate<TRequest, TResult> middleware)
-        => SetDefault(new TerminateComponentDescriptor<TRequest, TResult>(middleware));
+    public MediumBuilder<TRequest, TResult> UseTermination(AsyncMiddlewareDelegate<TRequest, TResult> middleware)
+        => UseTermination(new TerminationMiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
-    /// Sets the default middleware for the Medium.
+    /// Sets termination middleware for the Medium.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
-    public MediumBuilder<TRequest, TResult> SetDefault(MiddlewareDelegate<TRequest, TResult> middleware)
-        => SetDefault(new TerminateComponentDescriptor<TRequest, TResult>(middleware));
+    public MediumBuilder<TRequest, TResult> UseTermination(MiddlewareDelegate<TRequest, TResult> middleware)
+        => UseTermination(new TerminationMiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds a middleware type to the Medium.
@@ -462,7 +492,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middlewareType">The middleware type.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(Type middlewareType)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middlewareType));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middlewareType));
 
     /// <summary>
     /// Adds a middleware type to the Medium with a condition.
@@ -471,7 +501,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middlewareType">The middleware type.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, Type middlewareType)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middlewareType) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middlewareType) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware type to the Medium.
@@ -494,7 +524,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(AsyncMiddlewareFunc<TRequest, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware function to the Medium with a condition.
@@ -503,7 +533,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, AsyncMiddlewareFunc<TRequest, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium.
@@ -511,7 +541,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(Func<TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition.
@@ -520,7 +550,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, Func<TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses a service provider.
@@ -528,7 +558,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a service provider.
@@ -537,7 +567,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses a dependency.
@@ -547,7 +577,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use<TDep>(Func<TDep, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep>(), request, next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep>(), request, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses a dependency.
@@ -558,7 +588,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen<TDep>(Predicate<TRequest> condition, Func<TDep, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep>(), request, next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep>(), request, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses two dependencies.
@@ -570,7 +600,7 @@ public class MediumBuilder<TRequest, TResult>
     public MediumBuilder<TRequest, TResult> Use<TDep1, TDep2>(Func<TDep1, TDep2, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses two dependencies.
@@ -583,7 +613,7 @@ public class MediumBuilder<TRequest, TResult>
     public MediumBuilder<TRequest, TResult> UseWhen<TDep1, TDep2>(Predicate<TRequest> condition, Func<TDep1, TDep2, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), request, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium that uses three dependencies.
@@ -597,7 +627,7 @@ public class MediumBuilder<TRequest, TResult>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next, ct)));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next, ct)));
 
     /// <summary>
     /// Adds an asynchronous middleware delegate to the Medium with a condition that uses three dependencies.
@@ -612,7 +642,7 @@ public class MediumBuilder<TRequest, TResult>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next, ct)) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => (request, ct) => middleware(sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), request, next, ct)) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware function to the Medium.
@@ -620,7 +650,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(MiddlewareFunc<TRequest, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds a middleware function to the Medium with a condition.
@@ -629,7 +659,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware function.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, MiddlewareFunc<TRequest, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium.
@@ -637,7 +667,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(Func<TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition.
@@ -646,7 +676,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, Func<TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium that uses a service provider.
@@ -654,7 +684,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use(Func<IServiceProvider, TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition that uses a service provider.
@@ -663,7 +693,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <param name="middleware">The middleware delegate.</param>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen(Predicate<TRequest> condition, Func<IServiceProvider, TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
-        => Use(new ComponentDescriptor<TRequest, TResult>(middleware) { Condition = condition });
+        => Use(new MiddlewareDescriptor<TRequest, TResult>(middleware) { Condition = condition });
 
     /// <summary>
     /// Adds a middleware delegate to the Medium that uses a dependency.
@@ -673,7 +703,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> Use<TDep>(Func<TRequest, TDep, NextMiddlewareDelegate<TResult>, TResult> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep>(), next)));
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep>(), next)));
 
     /// <summary>
     /// Adds a middleware delegate to the Medium with a condition that uses a dependency.
@@ -684,7 +714,7 @@ public class MediumBuilder<TRequest, TResult>
     /// <returns>The current <see cref="MediumBuilder{TRequest, TResult}"/> instance.</returns>
     public MediumBuilder<TRequest, TResult> UseWhen<TDep>(Predicate<TRequest> condition, Func<TRequest, TDep, NextMiddlewareDelegate<TResult>, TResult> middleware)
         where TDep : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep>(), next)) { Condition = condition }
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep>(), next)) { Condition = condition }
         );
 
     /// <summary>
@@ -697,7 +727,7 @@ public class MediumBuilder<TRequest, TResult>
     public MediumBuilder<TRequest, TResult> Use<TDep1, TDep2>(Func<TRequest, TDep1, TDep2, NextMiddlewareDelegate<TResult>, TResult> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next))
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next))
         );
 
     /// <summary>
@@ -710,7 +740,7 @@ public class MediumBuilder<TRequest, TResult>
     public MediumBuilder<TRequest, TResult> UseWhen<TDep1, TDep2>(Predicate<TRequest> condition, Func<TRequest, TDep1, TDep2, NextMiddlewareDelegate<TResult>, TResult> middleware)
         where TDep1 : notnull
         where TDep2 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next)) { Condition = condition }
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), next)) { Condition = condition }
         );
 
     /// <summary>
@@ -725,7 +755,7 @@ public class MediumBuilder<TRequest, TResult>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next))
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next))
         );
 
     /// <summary>
@@ -740,6 +770,6 @@ public class MediumBuilder<TRequest, TResult>
         where TDep1 : notnull
         where TDep2 : notnull
         where TDep3 : notnull
-        => Use(new ComponentDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next)) { Condition = condition }
+        => Use(new MiddlewareDescriptor<TRequest, TResult>((sp, next) => request => middleware(request, sp.GetRequiredService<TDep1>(), sp.GetRequiredService<TDep2>(), sp.GetRequiredService<TDep3>(), next)) { Condition = condition }
         );
 }

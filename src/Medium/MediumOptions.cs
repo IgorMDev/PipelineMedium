@@ -7,14 +7,14 @@
 public class MediumOptions<TRequest>
 {
     /// <summary>
-    /// Gets or sets the list of component descriptors for the Medium.
+    /// Gets or sets the list of middleware descriptors for the Medium.
     /// </summary>
-    public List<ComponentDescriptor<TRequest>> Components { get; set; } = [];
+    public List<MiddlewareDescriptor<TRequest>> Middlewares { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets the terminate component descriptor for the Medium.
+    /// Gets or sets the termination middleware descriptor for the Medium.
     /// </summary>
-    public TerminateComponentDescriptor<TRequest> TerminateComponent { get; set; } = new();
+    public TerminationMiddlewareDescriptor<TRequest> TerminationMiddleware { get; set; } = new();
 }
 
 /// <summary>
@@ -25,12 +25,12 @@ public class MediumOptions<TRequest>
 public class MediumOptions<TRequest, TResult>
 {
     /// <summary>
-    /// Gets or sets the list of component descriptors for the Medium.
+    /// Gets or sets the list of middleware descriptors for the Medium.
     /// </summary>
-    public List<ComponentDescriptor<TRequest, TResult>> Components { get; set; } = [];
+    public List<MiddlewareDescriptor<TRequest, TResult>> Middlewares { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets the terminate component descriptor for the Medium.
+    /// Gets or sets the termination middleware descriptor for the Medium.
     /// </summary>
-    public TerminateComponentDescriptor<TRequest, TResult> TerminateComponent { get; set; } = new();
+    public TerminationMiddlewareDescriptor<TRequest, TResult> TerminationMiddleware { get; set; } = new();
 }

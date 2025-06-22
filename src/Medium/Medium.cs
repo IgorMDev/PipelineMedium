@@ -39,36 +39,59 @@ public class Medium(IServiceProvider serviceProvider) : IMedium
 /// Represents a medium for executing operations with a specific request type.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
-public class Medium<TRequest>(
-    IServiceProvider serviceProvider,
-    IOptionsMonitor<MediumOptions<TRequest>> optionsMonitor,
-    IComponentBinderFactory<TRequest> componentBinderFactory
-) : IMedium<TRequest>
+public class Medium<TRequest> : IMedium<TRequest>
 {
+    private readonly IServiceProvider _serviceProvider;
+
     private readonly Dictionary<string, ContextualAsyncMiddlewareDelegate<TRequest>> _asyncMiddlewareDelegates = [];
     private readonly Dictionary<string, ContextualMiddlewareDelegate<TRequest>> _middlewareDelegates = [];
 
-    private IComponentBinder<TRequest> GetBinder(string name)
-    {
-        var options = optionsMonitor.Get(name);
-        var binder = componentBinderFactory.Create()
-            .Init(options.TerminateComponent)
-            .BindComponents(options.Components);
+    private readonly Func<string, MediumOptions<TRequest>> _optionsFactoryFunc;
 
-        return binder;
+    public Medium(IServiceProvider serviceProvider, IOptionsMonitor<MediumOptions<TRequest>> optionsMonitor)
+    {
+        _serviceProvider = serviceProvider;
+        _optionsFactoryFunc = name => optionsMonitor.Get(name);
+    }
+
+    internal Medium(IServiceProvider serviceProvider, MediumOptions<TRequest> options)
+    {
+        _serviceProvider = serviceProvider;
+        _optionsFactoryFunc = _ => options;
+    }
+
+    protected ContextualAsyncMiddlewareDelegate<TRequest> GetAsyncMiddlewareDelegate(in string name)
+    {
+        if(_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
+            return middlewareDelegate;
+
+        var options = _optionsFactoryFunc(name);
+        var pipeline = new MiddlewarePipeline<TRequest>(options.TerminationMiddleware)
+            .AddMiddlewares(options.Middlewares);
+
+        return pipeline.ToAsyncMiddlewareDelegate();
+    }
+
+    protected ContextualMiddlewareDelegate<TRequest> GetMiddlewareDelegate(in string name)
+    {
+        var options = _optionsFactoryFunc(name);
+        var pipeline = new MiddlewarePipeline<TRequest>(options.TerminationMiddleware)
+            .AddMiddlewares(options.Middlewares);
+
+        return pipeline.ToMiddlewareDelegate();
     }
 
     /// <inheritdoc />
-    public Task ExecuteAsync(string name, TRequest request, CancellationToken cancellationToken = default)
+    public async Task ExecuteAsync(string name, TRequest request, CancellationToken cancellationToken = default)
     {
-        if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
-            _asyncMiddlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetAsyncMiddlewareDelegate();
+        var middlewareDelegate = GetAsyncMiddlewareDelegate(name);
 
-        MediumContext<TRequest> context = new(serviceProvider, request)
+        using var serviceScope = _serviceProvider.CreateScope();
+        MediumContext<TRequest> context = new(serviceScope.ServiceProvider, request)
         {
             CancellationToken = cancellationToken
         };
-        return middlewareDelegate(context);
+        await middlewareDelegate(context);
     }
 
     /// <inheritdoc />
@@ -77,10 +100,10 @@ public class Medium<TRequest>(
     /// <inheritdoc />
     public void Execute(string name, TRequest request)
     {
-        if(!_middlewareDelegates.TryGetValue(name, out var middlewareDelegate))
-            _middlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetMiddlewareDelegate();
+        var middlewareDelegate = GetMiddlewareDelegate(name);
 
-        MediumContext<TRequest> context = new(serviceProvider, request);
+        using var serviceScope = _serviceProvider.CreateScope();
+        MediumContext<TRequest> context = new(serviceScope.ServiceProvider, request);
         middlewareDelegate(context);
     }
 
@@ -93,36 +116,59 @@ public class Medium<TRequest>(
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public class Medium<TRequest, TResult>(
-    IServiceProvider serviceProvider,
-    IOptionsMonitor<MediumOptions<TRequest, TResult>> optionsMonitor,
-    IComponentBinderFactory<TRequest, TResult> componentBinderFactory
-) : IMedium<TRequest, TResult>
+public class Medium<TRequest, TResult> : IMedium<TRequest, TResult>
 {
+    private readonly IServiceProvider _serviceProvider;
+
     private readonly Dictionary<string, ContextualAsyncMiddlewareDelegate<TRequest, TResult>> _asyncMiddlewareDelegates = [];
     private readonly Dictionary<string, ContextualMiddlewareDelegate<TRequest, TResult>> _middlewareDelegates = [];
 
-    private IComponentBinder<TRequest, TResult> GetBinder(string name)
-    {
-        var options = optionsMonitor.Get(name);
-        var binder = componentBinderFactory.Create()
-            .Init(options.TerminateComponent)
-            .BindComponents(options.Components);
+    private readonly Func<string, MediumOptions<TRequest, TResult>> _optionsFactoryFunc;
 
-        return binder;
+    public Medium(IServiceProvider serviceProvider, IOptionsMonitor<MediumOptions<TRequest, TResult>> optionsMonitor)
+    {
+        _serviceProvider = serviceProvider;
+        _optionsFactoryFunc = name => optionsMonitor.Get(name);
+    }
+
+    internal Medium(IServiceProvider serviceProvider, MediumOptions<TRequest, TResult> options)
+    {
+        _serviceProvider = serviceProvider;
+        _optionsFactoryFunc = _ => options;
+    }
+
+    protected ContextualAsyncMiddlewareDelegate<TRequest, TResult> GetAsyncMiddlewareDelegate(in string name)
+    {
+        if (_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
+            return middlewareDelegate;
+
+        var options = _optionsFactoryFunc(name);
+        var pileline = new MiddlewarePipeline<TRequest, TResult>(options.TerminationMiddleware)
+            .AddMiddlewares(options.Middlewares);
+
+        return pileline.ToAsyncMiddlewareDelegate();
+    }
+
+    protected ContextualMiddlewareDelegate<TRequest, TResult> GetMiddlewareDelegate(in string name)
+    {
+        var options = _optionsFactoryFunc(name);
+        var pileline = new MiddlewarePipeline<TRequest, TResult>(options.TerminationMiddleware)
+            .AddMiddlewares(options.Middlewares);
+
+        return pileline.ToMiddlewareDelegate();
     }
 
     /// <inheritdoc />
-    public Task<TResult> ExecuteAsync(string name, TRequest request, CancellationToken cancellationToken = default)
+    public async Task<TResult> ExecuteAsync(string name, TRequest request, CancellationToken cancellationToken = default)
     {
-        if(!_asyncMiddlewareDelegates.TryGetValue(name, out var middlewareDelegate))
-            _asyncMiddlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetAsyncMiddlewareDelegate();
+        var middlewareDelegate = GetAsyncMiddlewareDelegate(name);
 
-        MediumContext<TRequest, TResult> context = new(serviceProvider, request)
+        using var serviceScope = _serviceProvider.CreateScope();
+        MediumContext<TRequest, TResult> context = new(serviceScope.ServiceProvider, request)
         {
             CancellationToken = cancellationToken
         };
-        return middlewareDelegate(context);
+        return await middlewareDelegate(context);
     }
 
     /// <inheritdoc />
@@ -131,10 +177,11 @@ public class Medium<TRequest, TResult>(
     /// <inheritdoc />
     public TResult Execute(string name, TRequest request)
     {
-        if(!_middlewareDelegates.TryGetValue(name, out var middlewareDelegate))
-            _middlewareDelegates[name] = middlewareDelegate = GetBinder(name).GetMiddlewareDelegate();
+        var middlewareDelegate = GetMiddlewareDelegate(name);
 
-        MediumContext<TRequest, TResult> context = new(serviceProvider, request);
+        using var serviceScope = _serviceProvider.CreateScope();
+        MediumContext<TRequest, TResult> context = new(serviceScope.ServiceProvider, request);
+
         return middlewareDelegate(context);
     }
 

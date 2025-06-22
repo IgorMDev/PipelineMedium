@@ -11,7 +11,7 @@ public class MediumValidateOptions<TRequest>(string? name) : IValidateOptions<Me
     public ValidateOptionsResult Validate(string? name, MediumOptions<TRequest> options)
     {
         if(name is null || name == Name) {
-            if(options.Components.Any(c => !c.IsValid) || !options.TerminateComponent.IsValid)
+            if(options.Middlewares.Any(c => !c.IsValid) || !options.TerminationMiddleware.IsValid)
                 return ValidateOptionsResult.Fail(Errors.InvalidComponentDescriptor);
 
             return ValidateOptionsResult.Success;
@@ -28,7 +28,7 @@ public class MediumValidateOptions<TRequest, TResult>(string? name) : IValidateO
     public ValidateOptionsResult Validate(string? name, MediumOptions<TRequest, TResult> options)
     {
         if(name is null || name == Name) {
-            if(options.Components.Any(c => !c.IsValid) || !options.TerminateComponent.IsValid)
+            if(options.Middlewares.Any(c => !c.IsValid) || !options.TerminationMiddleware.IsValid)
                 return ValidateOptionsResult.Fail(Errors.InvalidComponentDescriptor);
 
             return ValidateOptionsResult.Success;

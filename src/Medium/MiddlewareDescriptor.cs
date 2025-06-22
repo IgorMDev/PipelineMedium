@@ -1,21 +1,21 @@
 ﻿namespace Medium;
 
 /// <summary>
-/// Represents a descriptor for a middleware component.
+/// Represents a descriptor for a middleware.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
-public class ComponentDescriptor<TRequest>
+public class MiddlewareDescriptor<TRequest>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class.
     /// </summary>
-    internal ComponentDescriptor() { }
+    internal MiddlewareDescriptor() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with a middleware type.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with a middleware type.
     /// </summary>
     /// <param name="middlewareType">The type of the middleware.</param>
-    public ComponentDescriptor(Type middlewareType)
+    public MiddlewareDescriptor(Type middlewareType)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareType);
@@ -28,10 +28,10 @@ public class ComponentDescriptor<TRequest>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with an asynchronous middleware action.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with an asynchronous middleware action.
     /// </summary>
     /// <param name="middlewareAction">The asynchronous middleware action.</param>
-    public ComponentDescriptor(AsyncMiddlewareSPFunc<TRequest> middlewareAction)
+    public MiddlewareDescriptor(AsyncMiddlewareSPFunc<TRequest> middlewareAction)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
@@ -44,34 +44,34 @@ public class ComponentDescriptor<TRequest>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with an asynchronous middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with an asynchronous middleware function.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware function.</param>
-    public ComponentDescriptor(AsyncMiddlewareFunc<TRequest> middleware)
+    public MiddlewareDescriptor(AsyncMiddlewareFunc<TRequest> middleware)
         : this((_, next) => middleware(next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with an asynchronous middleware delegate.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with an asynchronous middleware delegate.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
+    public MiddlewareDescriptor(Func<TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         : this((_, next) => (request, ct) => middleware(request, next, ct))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with an asynchronous middleware delegate that uses a service provider.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with an asynchronous middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
+    public MiddlewareDescriptor(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate, CancellationToken, Task> middleware)
         : this((sp, next) => (request, ct) => middleware(sp, request, next, ct))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with a middleware action.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with a middleware action.
     /// </summary>
     /// <param name="middlewareAction">The middleware action.</param>
-    public ComponentDescriptor(MiddlewareSPFunc<TRequest> middlewareAction)
+    public MiddlewareDescriptor(MiddlewareSPFunc<TRequest> middlewareAction)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
@@ -84,26 +84,26 @@ public class ComponentDescriptor<TRequest>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with a middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with a middleware function.
     /// </summary>
     /// <param name="middleware">The middleware function.</param>
-    public ComponentDescriptor(MiddlewareFunc<TRequest> middleware)
+    public MiddlewareDescriptor(MiddlewareFunc<TRequest> middleware)
         : this((_, next) => middleware(next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with a middleware delegate.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with a middleware delegate.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
-    public ComponentDescriptor(Action<TRequest, NextMiddlewareDelegate> middleware)
+    public MiddlewareDescriptor(Action<TRequest, NextMiddlewareDelegate> middleware)
         : this((_, next) => request => middleware(request, next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest}"/> class with a middleware delegate that uses a service provider.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest}"/> class with a middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
-    public ComponentDescriptor(Action<IServiceProvider, TRequest, NextMiddlewareDelegate> middleware)
+    public MiddlewareDescriptor(Action<IServiceProvider, TRequest, NextMiddlewareDelegate> middleware)
         : this((sp, next) => request => middleware(sp, request, next))
     { }
 
@@ -134,25 +134,25 @@ public class ComponentDescriptor<TRequest>
 }
 
 /// <summary>
-/// Represents a descriptor for a terminate component.
+/// Represents a descriptor for a termination middleware.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
-public class TerminateComponentDescriptor<TRequest>
+public class TerminationMiddlewareDescriptor<TRequest>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest}"/> class.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest}"/> class.
     /// </summary>
-    internal TerminateComponentDescriptor()
+    internal TerminationMiddlewareDescriptor()
     {
         Action = _ => { };
         AsyncAction = (_, _) => Task.CompletedTask;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest}"/> class with an asynchronous middleware action.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest}"/> class with an asynchronous middleware action.
     /// </summary>
     /// <param name="middlewareAction">The asynchronous middleware action.</param>
-    public TerminateComponentDescriptor(AsyncMiddlewareDelegate<TRequest> middlewareAction)
+    public TerminationMiddlewareDescriptor(AsyncMiddlewareDelegate<TRequest> middlewareAction)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
@@ -165,10 +165,10 @@ public class TerminateComponentDescriptor<TRequest>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest}"/> class with a middleware action.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest}"/> class with a middleware action.
     /// </summary>
     /// <param name="middlewareAction">The middleware action.</param>
-    public TerminateComponentDescriptor(MiddlewareDelegate<TRequest> middlewareAction)
+    public TerminationMiddlewareDescriptor(MiddlewareDelegate<TRequest> middlewareAction)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareAction);
@@ -197,22 +197,22 @@ public class TerminateComponentDescriptor<TRequest>
 }
 
 /// <summary>
-/// Represents a descriptor for a middleware component with a result.
+/// Represents a descriptor for a middleware with a result.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public class ComponentDescriptor<TRequest, TResult>
+public class MiddlewareDescriptor<TRequest, TResult>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class.
     /// </summary>
-    internal ComponentDescriptor() { }
+    internal MiddlewareDescriptor() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with a middleware type.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with a middleware type.
     /// </summary>
     /// <param name="middlewareType">The type of the middleware.</param>
-    public ComponentDescriptor(Type middlewareType)
+    public MiddlewareDescriptor(Type middlewareType)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareType);
@@ -225,10 +225,10 @@ public class ComponentDescriptor<TRequest, TResult>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The asynchronous middleware function.</param>
-    public ComponentDescriptor(AsyncMiddlewareSPFunc<TRequest, TResult> middlewareFunc)
+    public MiddlewareDescriptor(AsyncMiddlewareSPFunc<TRequest, TResult> middlewareFunc)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
@@ -241,34 +241,34 @@ public class ComponentDescriptor<TRequest, TResult>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The asynchronous middleware function.</param>
-    public ComponentDescriptor(AsyncMiddlewareFunc<TRequest, TResult> middlewareFunc)
+    public MiddlewareDescriptor(AsyncMiddlewareFunc<TRequest, TResult> middlewareFunc)
         : this((_, next) => middlewareFunc(next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with an asynchronous middleware delegate.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with an asynchronous middleware delegate.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
+    public MiddlewareDescriptor(Func<TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         : this((_, next) => (request, ct) => middleware(request, next, ct))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with an asynchronous middleware delegate that uses a service provider.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with an asynchronous middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The asynchronous middleware delegate.</param>
-    public ComponentDescriptor(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
+    public MiddlewareDescriptor(Func<IServiceProvider, TRequest, NextAsyncMiddlewareDelegate<TResult>, CancellationToken, Task<TResult>> middleware)
         : this((sp, next) => (request, ct) => middleware(sp, request, next, ct))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with a middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with a middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The middleware function.</param>
-    public ComponentDescriptor(MiddlewareSPFunc<TRequest, TResult> middlewareFunc)
+    public MiddlewareDescriptor(MiddlewareSPFunc<TRequest, TResult> middlewareFunc)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
@@ -281,26 +281,26 @@ public class ComponentDescriptor<TRequest, TResult>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with a middleware function.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with a middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The middleware function.</param>
-    public ComponentDescriptor(MiddlewareFunc<TRequest, TResult> middlewareFunc)
+    public MiddlewareDescriptor(MiddlewareFunc<TRequest, TResult> middlewareFunc)
         : this((_, next) => middlewareFunc(next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with a middleware delegate.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with a middleware delegate.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
-    public ComponentDescriptor(Func<TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
+    public MiddlewareDescriptor(Func<TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
         : this((_, next) => request => middleware(request, next))
     { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComponentDescriptor{TRequest, TResult}"/> class with a middleware delegate that uses a service provider.
+    /// Initializes a new instance of the <see cref="MiddlewareDescriptor{TRequest, TResult}"/> class with a middleware delegate that uses a service provider.
     /// </summary>
     /// <param name="middleware">The middleware delegate.</param>
-    public ComponentDescriptor(Func<IServiceProvider, TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
+    public MiddlewareDescriptor(Func<IServiceProvider, TRequest, NextMiddlewareDelegate<TResult>, TResult> middleware)
         : this((sp, next) => request => middleware(sp, request, next))
     { }
 
@@ -331,26 +331,26 @@ public class ComponentDescriptor<TRequest, TResult>
 }
 
 /// <summary>
-/// Represents a descriptor for a terminate component with a result.
+/// Represents a descriptor for a termination middleware with a result.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public class TerminateComponentDescriptor<TRequest, TResult>
+public class TerminationMiddlewareDescriptor<TRequest, TResult>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest, TResult}"/> class.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest, TResult}"/> class.
     /// </summary>
-    internal TerminateComponentDescriptor()
+    internal TerminationMiddlewareDescriptor()
     {
         Func = _ => default!;
         AsyncFunc = (_, _) => Task.FromResult<TResult>(default!);
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest, TResult}"/> class with an asynchronous middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The asynchronous middleware function.</param>
-    public TerminateComponentDescriptor(AsyncMiddlewareDelegate<TRequest, TResult> middlewareFunc)
+    public TerminationMiddlewareDescriptor(AsyncMiddlewareDelegate<TRequest, TResult> middlewareFunc)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);
@@ -363,10 +363,10 @@ public class TerminateComponentDescriptor<TRequest, TResult>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TerminateComponentDescriptor{TRequest, TResult}"/> class with a middleware function.
+    /// Initializes a new instance of the <see cref="TerminationMiddlewareDescriptor{TRequest, TResult}"/> class with a middleware function.
     /// </summary>
     /// <param name="middlewareFunc">The middleware function.</param>
-    public TerminateComponentDescriptor(MiddlewareDelegate<TRequest, TResult> middlewareFunc)
+    public TerminationMiddlewareDescriptor(MiddlewareDelegate<TRequest, TResult> middlewareFunc)
     {
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(middlewareFunc);

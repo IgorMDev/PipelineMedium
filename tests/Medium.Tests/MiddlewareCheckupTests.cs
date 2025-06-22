@@ -335,7 +335,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeDefaultAsyncMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault((p, _) => {
+        var medium = CreateMedium(b => b.UseTermination((p, _) => {
             p.IsInvokedAsync = true;
             return Task.CompletedTask;
         }));
@@ -350,7 +350,7 @@ public partial class MiddlewareCheckupTests
     [Fact]
     public void Execute_InvokeDefaultMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault(p => {
+        var medium = CreateMedium(b => b.UseTermination(p => {
             p.IsInvoked = true;
         }));
 
@@ -689,7 +689,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public async Task ExecuteAsync_InvokeDefaultAsyncMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault((p, _) => {
+        var medium = CreateMedium(b => b.UseTermination((p, _) => {
             return Task.FromResult(new CheckupResult { IsInvokedAsync = true });
         }));
 
@@ -703,7 +703,7 @@ public class MiddlewareWithResultCheckupTests
     [Fact]
     public void Execute_InvokeDefaultMiddleware()
     {
-        var medium = CreateMedium(b => b.SetDefault(p => {
+        var medium = CreateMedium(b => b.UseTermination(p => {
             return new CheckupResult { IsInvoked = true };
         }));
 
