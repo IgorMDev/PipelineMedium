@@ -3,12 +3,30 @@ using Medium.Tests.Services;
 
 namespace Medium.Tests.Middlewares;
 
+internal class ICheckupAsyncMiddleware : IAsyncMiddleware<ICheckupRequest>
+{
+    public Task InvokeAsync(ICheckupRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
+    {
+        request.IsInvokedAsync = true;
+        return next();
+    }
+}
+
 internal class CheckupAsyncMiddleware : IAsyncMiddleware<CheckupRequest>
 {
     public Task InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate next, CancellationToken cancellationToken)
     {
         request.IsInvokedAsync = true;
         return next();
+    }
+}
+
+internal class ICheckupMiddleware : IMiddleware<ICheckupRequest>
+{
+    public void Invoke(ICheckupRequest request, NextMiddlewareDelegate next)
+    {
+        request.IsInvoked = true;
+        next();
     }
 }
 
@@ -37,6 +55,16 @@ internal class CheckupExceptionMiddleware : IMiddleware<CheckupRequest>
     }
 }
 
+internal class ICheckupResultAsyncMiddleware : IAsyncMiddleware<ICheckupRequest, CheckupResult>
+{
+    public Task<CheckupResult> InvokeAsync(ICheckupRequest request, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new CheckupResult {
+            IsInvokedAsync = true
+        });
+    }
+}
+
 internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupRequest, CheckupResult>
 {
     public Task<CheckupResult> InvokeAsync(CheckupRequest request, NextAsyncMiddlewareDelegate<CheckupResult> next, CancellationToken cancellationToken)
@@ -44,6 +72,16 @@ internal class CheckupResultAsyncMiddleware : IAsyncMiddleware<CheckupRequest, C
         return Task.FromResult(new CheckupResult {
             IsInvokedAsync = true
         });
+    }
+}
+
+internal class ICheckupResultMiddleware : IMiddleware<ICheckupRequest, CheckupResult>
+{
+    public CheckupResult Invoke(ICheckupRequest request, NextMiddlewareDelegate<CheckupResult> next)
+    {
+        return new CheckupResult {
+            IsInvoked = true
+        };
     }
 }
 

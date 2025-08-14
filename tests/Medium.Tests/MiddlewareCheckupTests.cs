@@ -27,6 +27,18 @@ public partial class MiddlewareCheckupTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_InvokeAsyncInterfaceMiddleware()
+    {
+        var medium = CreateMedium(b => b.Use<ICheckupAsyncMiddleware>());
+
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
+
+        Assert.True(request.IsInvokedAsync);
+        Assert.False(request.IsInvoked);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddleware()
     {
         var medium = CreateMedium(b => b.Use<CheckupAsyncMiddleware>());
@@ -36,6 +48,18 @@ public partial class MiddlewareCheckupTests
 
         Assert.True(request.IsInvokedAsync);
         Assert.False(request.IsInvoked);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InvokeInterfaceMiddleware()
+    {
+        var medium = CreateMedium(b => b.Use<ICheckupMiddleware>());
+
+        var request = new CheckupRequest();
+        await medium.ExecuteAsync(request);
+
+        Assert.True(request.IsInvoked);
+        Assert.False(request.IsInvokedAsync);
     }
 
     [Fact]
@@ -381,6 +405,18 @@ public class MiddlewareWithResultCheckupTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_InvokeAsyncInterfaceMiddleware()
+    {
+        var medium = CreateMedium(b => b.Use<ICheckupResultAsyncMiddleware>());
+
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
+
+        Assert.True(res.IsInvokedAsync);
+        Assert.False(res.IsInvoked);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_InvokeAsyncMiddleware()
     {
         var medium = CreateMedium(b => b.Use<CheckupResultAsyncMiddleware>());
@@ -390,6 +426,18 @@ public class MiddlewareWithResultCheckupTests
 
         Assert.True(res.IsInvokedAsync);
         Assert.False(res.IsInvoked);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InvokeInterfaceMiddleware()
+    {
+        var medium = CreateMedium(b => b.Use<ICheckupResultMiddleware>());
+
+        var request = new CheckupRequest();
+        var res = await medium.ExecuteAsync(request);
+
+        Assert.True(res.IsInvoked);
+        Assert.False(res.IsInvokedAsync);
     }
 
     [Fact]
