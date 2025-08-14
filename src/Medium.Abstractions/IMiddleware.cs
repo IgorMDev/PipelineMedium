@@ -4,7 +4,7 @@
 /// Represents an asynchronous middleware component that processes a request and invokes the next middleware in the pipeline.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
-public interface IAsyncMiddleware<TRequest>
+public interface IAsyncMiddleware<in TRequest>
 {
     /// <summary>
     /// Processes the request asynchronously and invokes the next middleware in the pipeline.
@@ -19,7 +19,7 @@ public interface IAsyncMiddleware<TRequest>
 /// Represents a middleware component that processes a request and invokes the next middleware in the pipeline.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
-public interface IMiddleware<TRequest>
+public interface IMiddleware<in TRequest>
 {
     /// <summary>
     /// Processes the request and invokes the next middleware in the pipeline.
@@ -34,7 +34,7 @@ public interface IMiddleware<TRequest>
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public interface IAsyncMiddleware<TRequest, TResult>
+public interface IAsyncMiddleware<in TRequest, TResult>
 {
     /// <summary>
     /// Processes the request asynchronously and invokes the next middleware in the pipeline, returning a result.
@@ -50,7 +50,7 @@ public interface IAsyncMiddleware<TRequest, TResult>
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public interface IMiddleware<TRequest, TResult>
+public interface IMiddleware<in TRequest, TResult>
 {
     /// <summary>
     /// Processes the request and invokes the next middleware in the pipeline, returning a result.
